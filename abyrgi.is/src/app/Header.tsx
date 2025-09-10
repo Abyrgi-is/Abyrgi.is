@@ -1,0 +1,115 @@
+"use client";
+import React, { useState } from "react";
+import Link from "next/link";
+
+export function Header() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <nav className="header-nav">
+      <span className="header-logo">Abyrgi.is</span>
+      {/* Desktop links */}
+      <div className="header-links">
+        <Link href="/">Home</Link>
+        <Link href="/about">About</Link>
+      </div>
+      {/* Hamburger for mobile */}
+      <button
+        className="header-hamburger"
+        onClick={() => setMenuOpen((open) => !open)}
+        aria-label="Toggle menu"
+      >
+        ☰
+      </button>
+      {/* Dropdown for mobile */}
+      <div className="header-dropdown" style={{ display: menuOpen ? "block" : "none" }}>
+        <Link href="/"
+          style={{
+            display: "block",
+            padding: "0.75rem 1rem",
+            textDecoration: "none",
+            color: "#0070f3",
+          }}
+        onClick={() => setMenuOpen(false)}>
+          Home
+        </Link>
+        <Link href="/about"
+          style={{
+            display: "block",
+            padding: "0.75rem 1rem",
+            textDecoration: "none",
+            color: "#0070f3",
+          }}
+        onClick={() => setMenuOpen(false)}>
+          About
+        </Link>
+      </div>
+      <style jsx>{`
+        .header-nav {
+          padding: 1rem 2rem;
+          border-bottom: 1px solid #eee;
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+        .header-logo {
+          font-weight: bold;
+          font-size: 1.2rem;
+        }
+        .header-links {
+          display: flex;
+          gap: 2rem;
+          margin-left: auto;
+        }
+        .header-links a {
+          color: #0070f3;
+          text-decoration: none;
+          padding: 0.5rem 0;
+        }
+        .header-hamburger {
+          display: none;
+          margin-left: auto;
+          background: none;
+          border: none;
+          font-size: 2rem;
+          cursor: pointer;
+        }
+        .header-dropdown {
+          display: none;
+          position: absolute;
+          top: 100%;
+          right: 2rem;
+          background: #fff;
+          border: 1px solid #eee;
+          border-radius: 4px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+          min-width: 120px;
+          z-index: 100;
+        }
+        .header-dropdown a {
+          display: none;
+          padding: 0.75rem 1rem;
+          text-decoration: none;
+          color: #0070f3;
+          background: none;
+        }
+        .header-dropdown a:hover {
+          background: #f0f8ff;
+        }
+        /* Responsive styles */
+        @media (max-width: 700px) {
+          .header-links {
+            display: none;
+          }
+          .header-hamburger {
+            display: block;
+          }
+          .header-dropdown {
+            display: ${menuOpen ? "flex" : "none"};
+            flex-direction: column;
+          }
+        }
+      `}</style>
+    </nav>
+  );
+}
