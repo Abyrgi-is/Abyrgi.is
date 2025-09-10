@@ -17,11 +17,13 @@ export function Header() {
 
   return (
     <nav className="header-nav">
-      <span className="header-logo">Abyrgi.is</span>
+      <span className="header-logo"><Link href="/">Abyrgi.is</Link></span>
       {/* Stór skjár links */}
       <div className="header-links">
-        <Link href="/">Home</Link>
+        <Link href="/"></Link>
         <Link href="/about">About</Link>
+        <Link href="/stillingar">Stillingar</Link>
+        <Link href="/minarsidur">Mínar Síður</Link>
       </div>
       {/* "Hamborgari" fyrir minni skjá */}
       <button
@@ -33,16 +35,6 @@ export function Header() {
       </button>
       {/* Dropdown fyrir mobile */}
       <div className="header-dropdown" style={{ display: menuOpen ? "block" : "none" }}>
-        <Link href="/"
-          style={{
-            display: "block",
-            padding: "0.75rem 1rem",
-            textDecoration: "none",
-            color: "#0070f3",
-          }}
-        onClick={() => setMenuOpen(false)}>
-          Home
-        </Link>
         <Link href="/about"
           style={{
             display: "block",
@@ -52,6 +44,26 @@ export function Header() {
           }}
         onClick={() => setMenuOpen(false)}>
           About
+        </Link>
+        <Link href="/stillingar"
+          style={{
+            display: "block",
+            padding: "0.75rem 1rem",
+            textDecoration: "none",
+            color: "#0070f3",
+          }}
+        onClick={() => setMenuOpen(false)}>
+          Stillingar
+        </Link>
+        <Link href="/minarsidur"
+          style={{
+            display: "block",
+            padding: "0.75rem 1rem",
+            textDecoration: "none",
+            color: "#0070f3",
+          }}
+        onClick={() => setMenuOpen(false)}>
+          Mínar Síður
         </Link>
       </div>
       <style jsx>{`
