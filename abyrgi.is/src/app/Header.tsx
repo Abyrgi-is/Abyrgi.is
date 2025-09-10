@@ -1,19 +1,29 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth > 700 && menuOpen) {
+        setMenuOpen(false);
+      }
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [menuOpen]);
+
   return (
     <nav className="header-nav">
       <span className="header-logo">Abyrgi.is</span>
-      {/* Desktop links */}
+      {/* Stór skjár links */}
       <div className="header-links">
         <Link href="/">Home</Link>
         <Link href="/about">About</Link>
       </div>
-      {/* Hamburger for mobile */}
+      {/* "Hamborgari" fyrir minni skjá */}
       <button
         className="header-hamburger"
         onClick={() => setMenuOpen((open) => !open)}
@@ -21,7 +31,7 @@ export function Header() {
       >
         ☰
       </button>
-      {/* Dropdown for mobile */}
+      {/* Dropdown fyrir mobile */}
       <div className="header-dropdown" style={{ display: menuOpen ? "block" : "none" }}>
         <Link href="/"
           style={{
