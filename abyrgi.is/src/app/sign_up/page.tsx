@@ -5,12 +5,12 @@ export default function SignUpPage() {
                 <form className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
-                            Username
+                            Fult Nafn
                         </label>
                         <input
                             type="text"
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                            placeholder="Enter your username"
+                            placeholder="Fult Nafn"
                         />
                     </div>
                     <div>
@@ -20,7 +20,27 @@ export default function SignUpPage() {
                         <input
                             type="email"
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                            placeholder="Enter your email"
+                            placeholder="Email"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                            símanúmer
+                        </label>
+                        <input
+                            type="text"
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                            placeholder="símanúmer"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                            heimilisfang
+                        </label>
+                        <input
+                            type="text"
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                            placeholder="heimilisfang"
                         />
                     </div>
                     <div>
@@ -30,7 +50,17 @@ export default function SignUpPage() {
                         <input
                             type="password"
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                            placeholder="Enter your password"
+                            placeholder="Password"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Confirm Password
+                        </label>
+                        <input
+                            type="password"
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                            placeholder="Confirm Password"
                         />
                     </div>
                     <button
