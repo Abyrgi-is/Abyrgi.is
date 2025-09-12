@@ -38,3 +38,6 @@ Markmið forritsins er að tryggja að einstaklingar geti komið bílnum sínum 
 # Wireframe:
 
 ![wireframe](./wireframe_user.jpg)
+
+# Höfundar eru
+Pétur, Ari, Aron
