@@ -86,10 +86,6 @@ export default function Home() {
       </p>
       {/* Custom link color */}
       <style jsx global>{`
-        body {
-          background: #E7ECEF;
-          color: #222;
-        }
         a, a:visited {
           color: #E7ECEF; 
           text-decoration: none;
@@ -97,11 +93,6 @@ export default function Home() {
         a:hover {
           text-decoration: underline;
         }
-        @media (prefers-color-scheme: dark) {
-          body {
-            background: #15121aff;
-            color: #f7f7f7;
-          }
       `}</style>
     </main>
   );

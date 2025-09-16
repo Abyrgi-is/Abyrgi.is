@@ -42,6 +42,18 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+body {
+  background: #E7ECEF;
+  color: #222;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #15121aff;
+    color: #f7f7f7;
+  }
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
