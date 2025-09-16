@@ -1,38 +1,24 @@
-// In your app/supabase/route.ts
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { type NextRequest, NextResponse } from 'next/server';
+import { createClient } from '../../utils/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
-  // We need to create a response object to handle potential cookie updates
-  const response = NextResponse.next({
-    request: { headers: request.headers },
-  });
+  const { searchParams, origin } = new URL(request.url)
+  const code = searchParams.get('code')
+  const next = searchParams.get('next') ?? '/'
 
-  // Create a Supabase client configured for Route Handlers
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          // The response object is used to set cookies
-          response.cookies.set({ name, value, ...options });
-        },
-        remove(name: string, options: CookieOptions) {
-          // The response object is used to delete cookies
-          response.cookies.set({ name, value: '', ...options });
-        },
-      },
+  if (code) {
+    const supabase = await createClient()
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    
+    if (!error) {
+      // Redirect to the intended page or home
+      return NextResponse.redirect(`${origin}${next}`)
+    } else {
+      console.error('Auth callback error:', error)
+      return NextResponse.redirect(`${origin}/auth/auth-code-error`)
     }
-  );
+  }
 
-  // You can now use this Supabase client safely
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // For API routes, you must return a Response object.
-  // We pass the headers from our response object to ensure cookies are set.
-  return NextResponse.json({ user }, { headers: response.headers });
+  // Return the user to an error page with instructions
+  return NextResponse.redirect(`${origin}/auth/auth-code-error`)
 }

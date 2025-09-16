@@ -1,4 +1,4 @@
-import { createClient } from '../../../utils/supabase/server'
+import { createClient } from '@/utils/supabase/server' // Use absolute import
 
 export default async function Page() {
   const supabase = await createClient()
@@ -22,7 +22,6 @@ export default async function Page() {
   return (
     <div>
       <h1>Users Data</h1>
-
       <div style={{ marginBottom: 12 }}>
         <p>User: {user ? user.email ?? user.id : 'anon'}</p>
         {userError && (
