@@ -1,107 +1,25 @@
 'use client'
 
 import React, { useState } from "react";
-import { createClient } from '@supabase/supabase-js';
 
-// --- Supabase singleton clients to avoid multiple GoTrueClient instances ---
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-// Keep module-level references so we only ever create these once per storage flavor
-let supabasePersist: ReturnType<typeof createClient> | null = null;
-let supabaseSession: ReturnType<typeof createClient> | null = null;
-
-function getSupabase(persist: boolean) {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      'Supabase environment variables are missing. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.'
-    );
-  }
-
-  if (persist) {
-    if (!supabasePersist) {
-      supabasePersist = createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-          storageKey: 'abyrgi-auth-persist',
-        },
-      });
-    }
-    return supabasePersist;
-  }
-
-  if (!supabaseSession) {
-    supabaseSession = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        storage: typeof window !== 'undefined' ? window.sessionStorage : undefined,
-        storageKey: 'abyrgi-auth-session',
-      },
-    });
-  }
-  return supabaseSession;
-}
-// --- end singleton setup ---
-
-export type SignInValues = {
-  email: string;
-  password: string;
-  remember: boolean;
-};
-
-export type SignInFormProps = {
-  onSubmit?: (values: SignInValues) => Promise<void> | void;
-  disabled?: boolean;
-  error?: string;
-  forgotPasswordHref?: string;
-  signUpHref?: string;
-  labels?: Partial<{
-    title: string;
-    subtitle: string;
-    email: string;
-    password: string;
-    remember: string;
-    submit: string;
-    forgot: string;
-    signupPrefix: string;
-    signupCta: string;
-  }>;
-  className?: string;
-  redirectTo?: string;
-};
-
-const defaultLabels = {
-  title: "Sign in",
-  subtitle: "Welcome back. Please enter your details.",
-  email: "Email",
-  password: "Password",
-  remember: "Remember me",
-  submit: "Sign in",
-  forgot: "Forgot password?",
-  signupPrefix: "Don’t have an account?",
-  signupCta: "Create one",
-};
-
-export function SignInForm({
-  onSubmit,
-  disabled,
-  error,
-  forgotPasswordHref = "#",
-  signUpHref = "/sign_up",
-  labels: customLabels,
-  className,
-  redirectTo,
-}: SignInFormProps) {
-  const labels = { ...defaultLabels, ...customLabels };
-
+export default function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const labels = {
+    title: "Sign in",
+    subtitle: "Welcome back. Please enter your details.",
+    email: "Email",
+    password: "Password",
+    remember: "Remember me",
+    submit: "Sign in",
+    forgot: "Forgot password?",
+    signupPrefix: "Don’t have an account?",
+    signupCta: "Create one",
+  };
 
   const validate = (): string | null => {
     if (!email.trim()) return "Please enter your email.";
@@ -113,7 +31,7 @@ export function SignInForm({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (disabled || loading) return;
+    if (loading) return;
 
     const v = validate();
     if (v) {
@@ -123,75 +41,54 @@ export function SignInForm({
 
     setLocalError(null);
     setLoading(true);
-    try {
-      if (onSubmit) {
-        await onSubmit({ email: email.trim(), password, remember });
-      } else {
-        const supabase = getSupabase(remember);
 
-        // Attempt sign-in
-        const { error: supaError } = await supabase.auth.signInWithPassword({
+    try {
+      const res = await fetch('/api/auth/sign_in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           email: email.trim(),
           password,
-        });
+          remember,
+        }),
+      });
 
-        if (supaError) {
-          // Surface clearer messages for common cases
-          const raw = (supaError.message || "").toLowerCase();
-          if (raw.includes("invalid login credentials")) {
-            throw new Error("Invalid email or password.");
-          }
-          if (raw.includes("email not confirmed") || raw.includes("email not confirmed")) {
-            throw new Error("Please confirm your email before signing in.");
-          }
-          throw new Error(supaError.message);
-        }
-
-        // Double-check that a session exists after sign-in; this helps catch CORS/site URL misconfig
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) {
-          console.error("Supabase getSession error:", sessionError);
-        }
-        if (!sessionData?.session) {
-          throw new Error(
-            "Signed in but no session was returned. Check your Supabase Auth settings (enable Email/Password), add your site's URL to 'Site URL' and 'Allowed CORS Origins', and verify NEXT_PUBLIC_SUPABASE_URL/ANON key."
-          );
-        }
-
-        if (redirectTo) {
-          window.location.assign(redirectTo);
-        }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any));
+        const message = data?.error || data?.message || 'Sign-in failed.';
+        throw new Error(message);
       }
+
+      // Success: server set httpOnly auth cookies via @supabase/ssr
+      window.location.assign('/minarsidur');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Something went wrong.";
-      // Log the full error for debugging in the browser console
-      console.error("Sign-in error:", err);
+      const msg = err instanceof Error ? err.message : 'Something went wrong.';
       setLocalError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  const formDisabled = Boolean(disabled || loading);
+  const formDisabled = loading;
 
   return (
     <form
       onSubmit={handleSubmit}
-      aria-describedby={error || localError ? "signin-error" : undefined}
-      className={`w-full max-w-md mx-auto rounded-xl bg-white shadow-lg p-8 space-y-6 ${className ?? ""}`}
+      aria-describedby={localError ? "signin-error" : undefined}
+      className="w-full max-w-md mx-auto rounded-xl bg-white shadow-lg p-8 space-y-6"
     >
       <div className="space-y-1 text-center">
         <h2 className="text-2xl font-bold text-gray-900">{labels.title}</h2>
         <p className="text-sm text-gray-600">{labels.subtitle}</p>
       </div>
 
-      {(error || localError) && (
+      {localError && (
         <div
           id="signin-error"
           role="alert"
           className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"
         >
-          {error || localError}
+          {localError}
         </div>
       )}
 
@@ -240,15 +137,6 @@ export function SignInForm({
             />
             <span>{labels.remember}</span>
           </label>
-
-          {forgotPasswordHref && (
-            <a
-              href={forgotPasswordHref}
-              className="text-sm text-sky-600 hover:underline"
-            >
-              {labels.forgot}
-            </a>
-          )}
         </div>
 
         <button
@@ -259,18 +147,7 @@ export function SignInForm({
         >
           {loading ? "Signing in…" : labels.submit}
         </button>
-
-        {signUpHref && (
-          <p className="text-center text-sm text-gray-600">
-            {labels.signupPrefix}{" "}
-            <a href={signUpHref} className="text-sky-600 hover:underline">
-              {labels.signupCta}
-            </a>
-          </p>
-        )}
       </div>
     </form>
   );
 }
-
-export default SignInForm;
