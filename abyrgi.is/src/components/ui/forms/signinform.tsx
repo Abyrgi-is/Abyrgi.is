@@ -2,12 +2,14 @@
 
 import { supabaseClient } from '@/utils/supabase/supabase-library'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function SignInForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,6 +24,7 @@ export default function SignInForm() {
       } else {
         setMessage('✅ Sign-in successful!')
         console.log('User data:', data)
+        router.push('/minarsidur')
       }
     } catch (err) {
       setMessage(`❌ Error: ${err}`)
