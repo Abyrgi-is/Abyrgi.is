@@ -1,153 +1,151 @@
 'use client'
 
-import React, { useState } from "react";
+import { supabaseClient } from '@/utils/supabase/supabase-library'
+import { useState } from 'react'
 
 export default function SignInForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const labels = {
-    title: "Sign in",
-    subtitle: "Welcome back. Please enter your details.",
-    email: "Email",
-    password: "Password",
-    remember: "Remember me",
-    submit: "Sign in",
-    forgot: "Forgot password?",
-    signupPrefix: "Don’t have an account?",
-    signupCta: "Create one",
-  };
-
-  const validate = (): string | null => {
-    if (!email.trim()) return "Please enter your email.";
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-    if (!emailOk) return "Please enter a valid email.";
-    if (!password) return "Please enter your password.";
-    return null;
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (loading) return;
-
-    const v = validate();
-    if (v) {
-      setLocalError(v);
-      return;
-    }
-
-    setLocalError(null);
-    setLoading(true);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setMessage('')
 
     try {
-      const res = await fetch('/api/auth/sign_in', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-          remember,
-        }),
-      });
+      const { data, error } = await supabaseClient.signIn(email.trim(), password)
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({} as any));
-        const message = data?.error || data?.message || 'Sign-in failed.';
-        throw new Error(message);
+      if (error) {
+        setMessage(`❌ Sign-in failed: ${error.message}`)
+      } else {
+        setMessage('✅ Sign-in successful!')
+        console.log('User data:', data)
       }
-
-      // Success: server set httpOnly auth cookies via @supabase/ssr
-      window.location.assign('/minarsidur');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Something went wrong.';
-      setLocalError(msg);
-    } finally {
-      setLoading(false);
+      setMessage(`❌ Error: ${err}`)
     }
-  };
 
-  const formDisabled = loading;
+    setLoading(false)
+  }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      aria-describedby={localError ? "signin-error" : undefined}
-      className="w-full max-w-md mx-auto rounded-xl bg-white shadow-lg p-8 space-y-6"
-    >
-      <div className="space-y-1 text-center">
-        <h2 className="text-2xl font-bold text-gray-900">{labels.title}</h2>
-        <p className="text-sm text-gray-600">{labels.subtitle}</p>
-      </div>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      backgroundColor: '#f4f4f9',
+      fontFamily: 'Arial, sans-serif',
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: 400,
+        backgroundColor: '#ffffff',
+        padding: 30,
+        borderRadius: 8,
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      }}>
+        <h2 style={{
+          textAlign: 'center',
+          marginBottom: 20,
+          color: '#333',
+        }}>Sign In</h2>
 
-      {localError && (
-        <div
-          id="signin-error"
-          role="alert"
-          className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-        >
-          {localError}
-        </div>
-      )}
-
-      <div className="space-y-4">
-        <label className="block text-left">
-          <span className="block text-sm font-medium text-gray-900 mb-1">
-            {labels.email}
-          </span>
-          <input
-            type="email"
-            name="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={formDisabled}
-            required
-            className="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500 disabled:cursor-not-allowed disabled:bg-gray-100"
-          />
-        </label>
-
-        <label className="block text-left">
-          <span className="block text-sm font-medium text-gray-900 mb-1">
-            {labels.password}
-          </span>
-          <input
-            type="password"
-            name="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={formDisabled}
-            required
-            className="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500 disabled:cursor-not-allowed disabled:bg-gray-100"
-          />
-        </label>
-
-        <div className="flex items-center justify-between">
-          <label className="inline-flex items-center gap-2 text-sm text-gray-900">
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{
+              display: 'block',
+              marginBottom: 8,
+              fontWeight: 'bold',
+              color: '#555',
+            }}>
+              Email
+            </label>
             <input
-              type="checkbox"
-              name="remember"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-              disabled={formDisabled}
-              className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500 disabled:cursor-not-allowed"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                fontSize: 16,
+                outline: 'none',
+                transition: 'border-color 0.2s',
+              }}
+              placeholder="Enter your email"
+              onFocus={(e) => e.target.style.borderColor = '#007bff'}
+              onBlur={(e) => e.target.style.borderColor = '#ddd'}
             />
-            <span>{labels.remember}</span>
-          </label>
-        </div>
+          </div>
 
-        <button
-          type="submit"
-          disabled={formDisabled}
-          aria-busy={loading || undefined}
-          className="w-full rounded-md bg-sky-600 px-4 py-2 text-white font-medium shadow hover:bg-sky-700 active:translate-y-px transition disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {loading ? "Signing in…" : labels.submit}
-        </button>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{
+              display: 'block',
+              marginBottom: 8,
+              fontWeight: 'bold',
+              color: '#555',
+            }}>
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                fontSize: 16,
+                outline: 'none',
+                transition: 'border-color 0.2s',
+              }}
+              placeholder="Enter your password"
+              onFocus={(e) => e.target.style.borderColor = '#007bff'}
+              onBlur={(e) => e.target.style.borderColor = '#ddd'}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              backgroundColor: loading ? '#ccc' : '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: 4,
+              fontSize: 16,
+              fontWeight: 'bold',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'background-color 0.2s',
+            }}
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
+
+        {message && (
+          <div style={{
+            marginTop: 20,
+            padding: 15,
+            backgroundColor: message.includes('✅') ? '#d4edda' : '#f8d7da',
+            color: message.includes('✅') ? '#155724' : '#721c24',
+            borderRadius: 4,
+            border: `1px solid ${message.includes('✅') ? '#c3e6cb' : '#f5c6cb'}`,
+            textAlign: 'center',
+          }}>
+            {message}
+          </div>
+        )}
       </div>
-    </form>
-  );
+    </div>
+  )
 }
