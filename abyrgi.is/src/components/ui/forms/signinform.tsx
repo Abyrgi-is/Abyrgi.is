@@ -1,6 +1,50 @@
 'use client'
 
 import React, { useState } from "react";
+import { createClient } from '@supabase/supabase-js';
+
+// --- Supabase singleton clients to avoid multiple GoTrueClient instances ---
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+// Keep module-level references so we only ever create these once per storage flavor
+let supabasePersist: ReturnType<typeof createClient> | null = null;
+let supabaseSession: ReturnType<typeof createClient> | null = null;
+
+function getSupabase(persist: boolean) {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(
+      'Supabase environment variables are missing. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.'
+    );
+  }
+
+  if (persist) {
+    if (!supabasePersist) {
+      supabasePersist = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+          storageKey: 'abyrgi-auth-persist',
+        },
+      });
+    }
+    return supabasePersist;
+  }
+
+  if (!supabaseSession) {
+    supabaseSession = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        storage: typeof window !== 'undefined' ? window.sessionStorage : undefined,
+        storageKey: 'abyrgi-auth-session',
+      },
+    });
+  }
+  return supabaseSession;
+}
+// --- end singleton setup ---
 
 export type SignInValues = {
   email: string;
@@ -26,6 +70,7 @@ export type SignInFormProps = {
     signupCta: string;
   }>;
   className?: string;
+  redirectTo?: string;
 };
 
 const defaultLabels = {
@@ -48,6 +93,7 @@ export function SignInForm({
   signUpHref = "/sign_up",
   labels: customLabels,
   className,
+  redirectTo,
 }: SignInFormProps) {
   const labels = { ...defaultLabels, ...customLabels };
 
@@ -81,10 +127,45 @@ export function SignInForm({
       if (onSubmit) {
         await onSubmit({ email: email.trim(), password, remember });
       } else {
-        console.log({ email: email.trim(), password: "••••••••", remember });
+        const supabase = getSupabase(remember);
+
+        // Attempt sign-in
+        const { error: supaError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+
+        if (supaError) {
+          // Surface clearer messages for common cases
+          const raw = (supaError.message || "").toLowerCase();
+          if (raw.includes("invalid login credentials")) {
+            throw new Error("Invalid email or password.");
+          }
+          if (raw.includes("email not confirmed") || raw.includes("email not confirmed")) {
+            throw new Error("Please confirm your email before signing in.");
+          }
+          throw new Error(supaError.message);
+        }
+
+        // Double-check that a session exists after sign-in; this helps catch CORS/site URL misconfig
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          console.error("Supabase getSession error:", sessionError);
+        }
+        if (!sessionData?.session) {
+          throw new Error(
+            "Signed in but no session was returned. Check your Supabase Auth settings (enable Email/Password), add your site's URL to 'Site URL' and 'Allowed CORS Origins', and verify NEXT_PUBLIC_SUPABASE_URL/ANON key."
+          );
+        }
+
+        if (redirectTo) {
+          window.location.assign(redirectTo);
+        }
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong.";
+      // Log the full error for debugging in the browser console
+      console.error("Sign-in error:", err);
       setLocalError(msg);
     } finally {
       setLoading(false);
