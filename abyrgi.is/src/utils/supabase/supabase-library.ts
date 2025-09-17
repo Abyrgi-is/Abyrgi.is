@@ -22,15 +22,29 @@ export const supabaseClient = {
   fetchData: async (table: string, schema?: string) => {
     let query = supabase.from(table).select('*')
     if (schema) {
-      query = query.schema(schema)
+      query = supabase.schema(schema).from(table).select('*')
+    }
+    const { data, error } = await query
+    return { data, error }
+  },
+
+  // Get user by email from database (for manual authentication)
+  getUserByEmail: async (email: string, schema?: string) => {
+    let query = supabase.from('Users').select('*').eq('email', email).single()
+    if (schema) {
+      query = supabase.schema(schema).from('Users').select('*').eq('email', email).single()
     }
     const { data, error } = await query
     return { data, error }
   },
 
   // Create a new user
-  signUp: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password })
+  signUp: async (email: string, password: string, options?: { emailRedirectTo?: string }) => {
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: options || {}
+    })
     return { data, error }
   },
 
