@@ -1,9 +1,10 @@
 "use client";
-import { supabaseClient } from "@/utils/supabase/supabase-library";
+import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 
+const supabase = createClient();
+
 export default function CarManager({ userId }: { userId: string }) {
-    // Use userId from props, do not redefine as state
     const [carData, setCarData] = useState({
         car_make: "",
         car_model: "",
@@ -16,12 +17,30 @@ export default function CarManager({ userId }: { userId: string }) {
     const [message, setMessage] = useState("");
     const [carIdToDelete, setCarIdToDelete] = useState("");
     const [showPopup, setShowPopup] = useState(false);
+    const [userIdState, setUserId] = useState<string | null>(null);
 
-    // Removed useEffect and local userId state
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUserId(user?.id || null);
+        };
+
+        fetchUser();
+    }, []);
 
     async function handleAddCar() {
+        if (!userIdState) {
+            setMessage("User not authenticated");
+            return;
+        }
+
         setMessage("Adding...");
-        const { data, error } = await supabaseClient.insertRow("Cars", { ...carData, user_id: userId }, "Abyrgi");
+        console.log("Authenticated Supabase UID:", userIdState);
+        const { data, error } = await supabase
+            .schema('Abyrgi').from("Cars")
+            .insert([{ ...carData, user_id: userIdState }])
+            .single();
+        console.log("user_id in insert payload:", userIdState);
         if (error) setMessage("Error: " + error.message);
         else setMessage("Car added!");
         setCarData({
@@ -37,7 +56,10 @@ export default function CarManager({ userId }: { userId: string }) {
 
     async function handleDeleteCar() {
         setMessage("Deleting...");
-        const { data, error } = await supabaseClient.deleteRows("Cars", { column: "car_id", value: carIdToDelete }, "Abyrgi");
+        const { data, error } = await supabase
+            .schema('Abyrgi').from("Cars")
+            .delete()
+            .eq("car_id", carIdToDelete);
         if (error) setMessage("Error: " + error.message);
         else setMessage("Car deleted!");
         setCarIdToDelete("");

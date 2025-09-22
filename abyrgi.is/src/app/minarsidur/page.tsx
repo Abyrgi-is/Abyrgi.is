@@ -17,7 +17,7 @@ type Car = {
 };
 
 // --- Server-side fetch ---
-const TEST_USER_ID = "88bd994e-ce9b-4e24-92dc-7b554ffa0574";
+const TEST_USER_ID = "e8b12e10-b30a-426f-854b-6ffcebe9b2fb";
 
 async function getUserCars(userId: string) {
 	const { data, error } = await supabaseClient.fetchData("Cars", "Abyrgi");
