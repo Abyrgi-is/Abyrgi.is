@@ -9,7 +9,7 @@ const SignupForm: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -43,41 +43,34 @@ const SignupForm: React.FC = () => {
     }
 
     try {
-      // Step 1: Sign up the user in Supabase Auth
-      const { data: authData, error: authError } = await supabaseClient.signUp(email, password);
+      const { data, error: createError, step } = await supabaseClient.createUser(
+        { email, password, name, username: username || undefined, address: address || undefined },
+        { schema: 'abyrgi', defaultRole: 'user' }
+      );
 
-      if (authError) {
-        console.error("Supabase Error (Sign Up):", authError);
-        setError(authError.message);
+      if (createError) {
+        console.error(`Error during ${step}:`, createError);
+
+        if (step === 'auth') {
+          setError(createError.message || "Failed to create account. Please try again.");
+        } else if (step === 'profile') {
+          setError("Account created but profile setup failed. Please contact support.");
+        } else {
+          setError("An unexpected error occurred. Please try again.");
+        }
         return;
       }
 
-      // Step 2: Add user details to the custom Users table
-      console.log("Data being sent to Users table:", {
-        name,
-        email,
-        password, 
-        phone_number: phone,
-        address,
-      });
-
-      const { data: userData, error: userError } = await supabaseClient.addUserToUsersTable({
-        name,
-        email,
-        password, 
-        phone_number: phone,
-        address,
-      });
-
-      console.log("Supabase Response (Add User):", { userData, userError });
-
-      if (userError) {
-        console.error("Supabase Error (Add User):", userError);
-        setError(userError.message || "An error occurred while adding the user.");
-        return;
-      }
-
+      console.log("User created successfully:", data);
       setSuccess("Sign-up successful! Please check your email to confirm your account.");
+
+      // Clear form
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setAddress("");
+      setUsername("");
     } catch (err) {
       console.error("Unexpected Error:", err);
       setError("An unexpected error occurred. Please try again.");
@@ -95,7 +88,7 @@ const SignupForm: React.FC = () => {
       >
         <div className="space-y-1">
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Name
+            Name *
           </label>
           <input
             id="name"
@@ -103,11 +96,12 @@ const SignupForm: React.FC = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="space-y-1">
           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
+            Email *
           </label>
           <input
             id="email"
@@ -115,11 +109,25 @@ const SignupForm: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+            Username (optional)
+          </label>
+          <input
+            id="username"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Leave blank to use email prefix"
+            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="space-y-1">
           <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Password
+            Password *
           </label>
           <input
             id="password"
@@ -127,11 +135,12 @@ const SignupForm: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="space-y-1">
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-            Confirm Password
+            Confirm Password *
           </label>
           <input
             id="confirmPassword"
@@ -139,33 +148,24 @@ const SignupForm: React.FC = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="space-y-1">
           <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-            Address
+            Address (optional)
           </label>
           <input
             id="address"
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-          />
-        </div>
-        <div className="space-y-1">
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-            Phone
-          </label>
-          <input
-            id="phone"
-            type="text"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
         >
           Sign Up
         </button>
