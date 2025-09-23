@@ -1,12 +1,24 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-supabase-url.supabase.co'
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key'
-const DEFAULT_SCHEMA = 'Abyrgi'
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  db: { schema: DEFAULT_SCHEMA }
-})
+// Ensure a single client in the browser (avoids multiple GoTrue instances in HMR)
+declare global {
+  // eslint-disable-next-line no-var
+  var __supabase__: SupabaseClient | undefined
+}
+
+const supabase = globalThis.__supabase__ ?? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+if (!globalThis.__supabase__) globalThis.__supabase__ = supabase
+
+// Helper to sanitize a username base
+const slugifyUsername = (s: string) =>
+  (s || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w.-]+/g, '') // keep a-z0-9 _ . -
+    .replace(/^[_\-.]+|[_\-.]+$/g, '') // trim edge symbols
 
 export const supabaseClient = {
   // Sign in with email and password
@@ -130,5 +142,218 @@ export const supabaseClient = {
     }
     const { data, error } = await query
     return { data, error }
-  }
+  },
+
+  // Ensure there is a profile row for the user (no username to avoid unique conflicts)
+  ensureProfileBase: async (
+    profile: { id: string; name: string; address?: string | null },
+    schema = 'abyrgi'
+  ) => {
+    const row = {
+      id: profile.id,
+      name: profile.name?.trim() || 'New user',
+      address: profile.address?.trim() || null,
+      // do NOT set username here to avoid unique conflicts
+    }
+    const { data, error } = await supabase
+      .schema(schema)
+      .from('profiles')
+      .upsert(row, { onConflict: 'id' })
+      .select('*')
+      .single()
+    return { data, error }
+  },
+
+  // Try to set a unique username by retrying with suffixes if needed
+  setProfileUsernameUnique: async (
+    userId: string,
+    desired: string,
+    schema = 'abyrgi',
+    maxAttempts = 5
+  ) => {
+    const base = slugifyUsername(desired) || 'user'
+    for (let i = 0; i < maxAttempts; i++) {
+      const suffix = i === 0 ? '' : String(Math.floor(1000 + Math.random() * 9000))
+      const candidate = `${base}${suffix}`
+      const { data, error } = await supabase
+        .schema(schema)
+        .from('profiles')
+        .update({ username: candidate })
+        .eq('id', userId)
+        .select('id, username')
+        .single()
+
+      if (!error) return { data, error: null }
+      // 23505 = unique violation; keep trying with a new suffix
+      const code = (error as any)?.code
+      const msg = (error as any)?.message || ''
+      const isUsernameUniqueViolation =
+        code === '23505' || /profiles_username_key/i.test(msg)
+      if (!isUsernameUniqueViolation) return { data: null, error }
+      // else continue and try another candidate
+    }
+    return {
+      data: null,
+      error: { message: 'Could not allocate a unique username after several attempts.' } as any,
+    }
+  },
+
+  // Keep: Ensure/Upsert full profile (now deprecated for username collisions)
+  ensureProfile: async (
+    profile: { id: string; name: string; username?: string | null; address?: string | null },
+    schema = 'abyrgi'
+  ) => {
+    const sanitized = {
+      id: profile.id,
+      name: profile.name?.trim() || 'New user',
+      username: profile.username?.trim() || null,
+      address: profile.address?.trim() || null,
+    }
+    const { data, error } = await supabase
+      .schema(schema)
+      .from('profiles')
+      .upsert(sanitized, { onConflict: 'id' })
+      .select('*')
+      .single()
+    return { data, error }
+  },
+
+  // Ensure a role exists (client-side read-only; seed via SQL/admin)
+  ensureRole: async (role: string, schema = 'abyrgi') => {
+    const { data, error } = await supabase
+      .schema(schema)
+      .from('roles')
+      .select('id')
+      .eq('role', role)
+      .maybeSingle()
+    if (error) return { id: null as string | null, error }
+    if (!data) return { id: null, error: { code: 'role_missing', message: `Role "${role}" not found` } as any }
+    return { id: data.id as string, error: null }
+  },
+
+  // Assign role to user (requires role to exist; user_roles RLS allows own insert)
+  assignRoleToUser: async (userId: string, role: string, schema = 'abyrgi') => {
+    const { id: roleId, error: roleErr } = await supabaseClient.ensureRole(role, schema)
+    if (roleErr || !roleId) return { data: null, error: roleErr ?? { message: 'Failed to resolve role id' } }
+
+    const { data, error } = await supabase
+      .schema(schema)
+      .from('user_roles')
+      .upsert([{ user_id: userId, role_id: roleId }], { onConflict: 'user_id,role_id' })
+      .select('*')
+    return { data, error }
+  },
+
+  // Optional: block client seeding to avoid RLS errors; use SQL or server key instead
+  seedDefaultRoles: async (_roles: string[], _schema = 'abyrgi') => {
+    return { data: null, error: { message: 'Seed roles via SQL or a server function with service key.' } }
+  },
+
+  // Bootstrap after sign-in: ensure base profile, then set unique username and role
+  bootstrapCurrentUser: async (options?: { schema?: string; defaultRole?: string }) => {
+    const schema = options?.schema ?? 'abyrgi'
+    const { data: { user }, error: userErr } = await supabase.auth.getUser()
+    if (userErr || !user) return { data: null, error: userErr ?? { message: 'No user' } }
+
+    const meta = (user.user_metadata || {}) as Record<string, any>
+    const name = (meta.name as string) || 'New user'
+    const usernameDesired = (meta.username as string) || (user.email?.split('@')[0] ?? '')
+
+    const baseRes = await supabaseClient.ensureProfileBase({ id: user.id, name, address: meta.address ?? null }, schema)
+    if (baseRes.error) return { data: null, error: baseRes.error }
+
+    // Try to set a unique username (ok if this fails; you can prompt the user later)
+    const setRes = await supabaseClient.setProfileUsernameUnique(user.id, usernameDesired, schema)
+    if (setRes.error && (setRes.error as any)?.code !== '23505') {
+      // return error only for non-unique issues
+      return { data: null, error: setRes.error }
+    }
+
+    if (options?.defaultRole) {
+      const { error: roleErr } = await supabaseClient.assignRoleToUser(user.id, options.defaultRole, schema)
+      if (roleErr) return { data: null, error: roleErr }
+    }
+
+    const { data: profile, error: profReadErr } = await supabase
+      .schema(schema)
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    if (profReadErr) return { data: null, error: profReadErr }
+    return { data: { user, profile }, error: null }
+  },
+
+  // One-call user creation: sign up; if session exists, write base profile then set a unique username
+  createUser: async (
+    userData: {
+      email: string
+      password: string
+      name: string
+      username?: string
+      address?: string
+    },
+    options?: {
+      emailRedirectTo?: string
+      schema?: string
+      defaultRole?: string
+    }
+  ) => {
+    const schema = options?.schema ?? 'abyrgi'
+    const desiredUsername = slugifyUsername(userData.username || userData.email.split('@')[0])
+
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          emailRedirectTo: options?.emailRedirectTo,
+          data: { name: userData.name, username: desiredUsername, address: userData.address ?? null },
+        },
+      })
+      if (authError) return { data: null, error: authError, step: 'auth' }
+      if (!authData.user?.id) return { data: null, error: { message: 'User registration failed.' }, step: 'auth' }
+
+      // If no session yet, stop here; profile/role will be done after confirmation/sign-in
+      if (!authData.session) {
+        return {
+          data: { user: authData.user, profile: null, session: null, pendingEmailConfirmation: true },
+          error: null,
+          step: 'pending_confirmation',
+        }
+      }
+
+      // Ensure base profile first (no username)
+      const baseRes = await supabaseClient.ensureProfileBase(
+        { id: authData.user.id, name: userData.name, address: userData.address ?? null },
+        schema
+      )
+      if (baseRes.error) return { data: null, error: baseRes.error, step: 'profile' }
+
+      // Now set a unique username with retries
+      const setRes = await supabaseClient.setProfileUsernameUnique(authData.user.id, desiredUsername, schema)
+      if (setRes.error) return { data: null, error: setRes.error, step: 'profile_username' }
+
+      // Optional default role
+      if (options?.defaultRole) {
+        const { error: roleErr } = await supabaseClient.assignRoleToUser(authData.user.id, options.defaultRole, schema)
+        if (roleErr) return { data: null, error: roleErr, step: 'role' }
+      }
+
+      // Return profile
+      const { data: profile, error: profReadErr } = await supabase
+        .schema(schema)
+        .from('profiles')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single()
+      if (profReadErr) return { data: null, error: profReadErr, step: 'profile_read' }
+
+      return { data: { user: authData.user, profile, session: authData.session }, error: null, step: 'complete' }
+    } catch {
+      return { data: null, error: { message: 'Unexpected error.' }, step: 'unknown' }
+    }
+  },
+
 }
