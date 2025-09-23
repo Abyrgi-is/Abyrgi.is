@@ -37,7 +37,7 @@ export default function CarManager({ userId }: { userId: string }) {
         setMessage("Adding...");
         console.log("Authenticated Supabase UID:", userIdState);
         const { data, error } = await supabase
-            .schema('Abyrgi').from("Cars")
+            .schema('abyrgi').from("cars")
             .insert([{ ...carData, user_id: userIdState }])
             .single();
         console.log("user_id in insert payload:", userIdState);
@@ -57,7 +57,7 @@ export default function CarManager({ userId }: { userId: string }) {
     async function handleDeleteCar() {
         setMessage("Deleting...");
         const { data, error } = await supabase
-            .schema('Abyrgi').from("Cars")
+            .schema('abyrgi').from("cars")
             .delete()
             .eq("car_id", carIdToDelete);
         if (error) setMessage("Error: " + error.message);
