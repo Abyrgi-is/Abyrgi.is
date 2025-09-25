@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from "react";
+import { useRouter } from 'next/navigation';
 import { supabaseClient } from "@/utils/supabase/supabase-library";
 
 const SignupForm: React.FC = () => {
@@ -11,34 +12,39 @@ const SignupForm: React.FC = () => {
   const [address, setAddress] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
+    setLoading(true);
 
     // Validate name
     if (!name || name.trim().length === 0) {
       setError("Please enter your name.");
+      setLoading(false);
       return;
     }
 
     // Validate email
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setError("Please enter a valid email address.");
+      setLoading(false);
       return;
     }
 
     // Validate password
     if (!password || password.length < 6) {
       setError("Password must be at least 6 characters long.");
+      setLoading(false);
       return;
     }
 
     // Check if passwords match
     if (password !== confirmPassword) {
       setError("Passwords do not match!");
+      setLoading(false);
       return;
     }
 
@@ -58,30 +64,25 @@ const SignupForm: React.FC = () => {
         } else {
           setError("An unexpected error occurred. Please try again.");
         }
+        setLoading(false);
         return;
       }
 
       console.log("User created successfully:", data);
-      setSuccess("Sign-up successful! Please check your email to confirm your account.");
-
-      // Clear form
-      setName("");
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
-      setAddress("");
-      setUsername("");
+      
+      // Redirect to sign in page with a parameter indicating they should check email
+      router.push('/sign_in?message=confirm_email');
     } catch (err) {
       console.error("Unexpected Error:", err);
       setError("An unexpected error occurred. Please try again.");
+      setLoading(false);
     }
   };
 
   return (
     <>
       <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Create an Account</h2>
-      {error && <p className="text-red-500 text-center">{error}</p>}
-      {success && <p className="text-green-500 text-center">{success}</p>}
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
       <form
         onSubmit={handleSubmit}
         className="max-w-md mx-auto p-6 bg-white rounded-lg shadow border border-gray-200 space-y-4"
@@ -165,11 +166,28 @@ const SignupForm: React.FC = () => {
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
+          disabled={loading}
+          className={`w-full py-2 px-4 rounded focus:ring-2 focus:ring-blue-500 ${
+            loading
+              ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+              : 'bg-blue-500 text-white hover:bg-blue-600'
+          }`}
         >
-          Sign Up
+          {loading ? 'Creating Account...' : 'Sign Up'}
         </button>
       </form>
+      
+      <div className="text-center mt-6">
+        <p className="text-sm text-gray-600">
+          Already have an account?{' '}
+          <a 
+            href="/sign_in" 
+            className="text-blue-500 hover:text-blue-600 underline"
+          >
+            Sign in
+          </a>
+        </p>
+      </div>
     </>
   );
 };
