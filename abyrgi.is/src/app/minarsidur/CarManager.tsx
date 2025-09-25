@@ -58,11 +58,17 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
     }
 
     async function handleDeleteCar() {
+        if (!userIdState) {
+            setMessage("User not authenticated");
+            return;
+        }
+
         setMessage("Deleting...");
         const { data, error } = await supabase
             .schema('abyrgi').from("cars")
             .delete()
-            .eq("plate", plateToDelete);
+            .eq("plate", plateToDelete)
+            .eq("user_id", userIdState);
         if (error) setMessage("Error: " + error.message);
         else {
             setMessage("Car deleted!");
