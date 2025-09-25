@@ -1,4 +1,5 @@
 import OrderButton from "@/components/ui/OrderButton";
+import Map from "@/components/ui/map";
 
 export default function BorgaPage() {
     return (
@@ -14,6 +15,7 @@ export default function BorgaPage() {
             <div className="flex justify-center">
                 <OrderButton />
             </div>
+            
         </div>
     );
 }
