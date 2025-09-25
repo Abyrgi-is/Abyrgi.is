@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Abyrgi.is - Driving Service App
+
+This is a [Next.js](https://nextjs.org) project for a driving service application that helps users get drivers to drive their cars safely to destinations.
+
+## Features
+
+- **User Authentication**: Complete sign-up and sign-in flow using Supabase Auth
+- **Email Verification**: Users receive email confirmation after sign-up
+- **Redirect Flow**: After sign-up, users are redirected to sign-in with a reminder to check their email
+- **Responsive Design**: Mobile-friendly interface built with Tailwind CSS
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+1. Node.js (version 18 or higher)
+2. A Supabase project
+
+### Setup
+
+1. Clone the repository
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables:
+   - Copy `.env.example` to `.env.local`
+   - Update the Supabase URL and API key with your project values
+
+4. Run the development server:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file with the following variables:
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Authentication Flow
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Sign Up**: New users create an account with email and password
+2. **Email Verification**: Supabase sends a confirmation email
+3. **Redirect to Sign In**: Users are automatically redirected to the sign-in page with a reminder to check their email
+4. **Sign In**: Once email is verified, users can sign in to access the application
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+src/
+├── app/
+│   ├── signin/          # Sign-in page
+│   ├── signup/          # Sign-up page
+│   ├── layout.tsx       # Root layout with AuthProvider
+│   └── page.tsx         # Homepage
+├── context/
+│   └── AuthContext.tsx  # Authentication context and provider
+└── utils/
+    └── supabase.ts      # Supabase client configuration
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## Technologies Used
+
+- **Next.js 15** - React framework
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **Supabase** - Backend and authentication
+- **React Context** - State management
+
+## Contributing
+
+This project follows the user stories and wireframes defined in the main README.md file.
