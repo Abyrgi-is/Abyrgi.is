@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 const supabase = createClient();
 
-export default function CarManager({ userId }: { userId: string }) {
+export default function CarManager({ onCarChange }: { onCarChange: () => void }) {
     const [carData, setCarData] = useState({
         car_make: "",
         car_model: "",
@@ -42,7 +42,10 @@ export default function CarManager({ userId }: { userId: string }) {
             .single();
         console.log("user_id in insert payload:", userIdState);
         if (error) setMessage("Error: " + error.message);
-        else setMessage("Car added!");
+        else {
+            setMessage("Car added!");
+            onCarChange(); // Trigger refresh of cars list
+        }
         setCarData({
             car_make: "",
             car_model: "",
@@ -61,7 +64,10 @@ export default function CarManager({ userId }: { userId: string }) {
             .delete()
             .eq("plate", plateToDelete);
         if (error) setMessage("Error: " + error.message);
-        else setMessage("Car deleted!");
+        else {
+            setMessage("Car deleted!");
+            onCarChange(); // Trigger refresh of cars list
+        }
         setPlateToDelete("");
     }
 

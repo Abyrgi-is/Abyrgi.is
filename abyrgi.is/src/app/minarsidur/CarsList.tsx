@@ -1,56 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { Car } from "./page";
 
-type Car = {
-  user_id: string;
-  created_at: string;
-  car_id: string;
-  car_make: string;
-  car_model: string;
-  car_model_year: number | null;
-  car_vin: string;
-  color: string | null;
-  manual: boolean | null;
-  plate: string;
-};
+interface CarsListProps {
+  cars: Car[];
+  loading: boolean;
+  error: string | null;
+}
 
-export default function CarsList() {
-  const supabase = createClient();
-  const [cars, setCars] = useState<Car[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const run = async () => {
-      try {
-        const { data: userRes } = await supabase.auth.getUser();
-        const uid = userRes.user?.id;
-        if (!uid) {
-          setError("No authenticated user. Please sign in.");
-          setLoading(false);
-          return;
-        }
-        const { data, error } = await supabase
-          .schema("abyrgi")
-          .from("cars")
-          .select("*")
-          .eq("user_id", uid);
-        if (error) {
-          setError(error.message);
-        } else {
-          setCars((data as Car[]) ?? []);
-        }
-      } catch (e: any) {
-        setError(e?.message ?? "Unknown error while fetching cars");
-      } finally {
-        setLoading(false);
-      }
-    };
-    run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+export default function CarsList({ cars, loading, error }: CarsListProps) {
   if (loading) return <p className="text-center">Loading cars…</p>;
   if (error) return <p className="text-center text-red-500">Failed to load cars: {error}</p>;
 
