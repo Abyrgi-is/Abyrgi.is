@@ -15,7 +15,7 @@ export default function CarManager({ userId }: { userId: string }) {
         plate: "",
     });
     const [message, setMessage] = useState("");
-    const [carIdToDelete, setCarIdToDelete] = useState("");
+    const [plateToDelete, setPlateToDelete] = useState("");
     const [showPopup, setShowPopup] = useState(false);
     const [userIdState, setUserId] = useState<string | null>(null);
 
@@ -59,10 +59,10 @@ export default function CarManager({ userId }: { userId: string }) {
         const { data, error } = await supabase
             .schema('abyrgi').from("cars")
             .delete()
-            .eq("car_id", carIdToDelete);
+            .eq("plate", plateToDelete);
         if (error) setMessage("Error: " + error.message);
         else setMessage("Car deleted!");
-        setCarIdToDelete("");
+        setPlateToDelete("");
     }
 
     return (
@@ -121,7 +121,7 @@ export default function CarManager({ userId }: { userId: string }) {
                             }}
                             className="space-y-2"
                         >
-                            <input className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Car ID to delete" value={carIdToDelete} onChange={(e) => setCarIdToDelete(e.target.value)} />
+                            <input className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Plate to delete" value={plateToDelete} onChange={(e) => setPlateToDelete(e.target.value)} />
                             <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded w-full">Delete Car</button>
                         </form>
 
