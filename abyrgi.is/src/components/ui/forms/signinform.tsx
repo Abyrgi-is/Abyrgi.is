@@ -1,15 +1,24 @@
 'use client'
 
 import { supabaseClient } from '@/utils/supabase/supabase-library'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function SignInForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [confirmationMessage, setConfirmationMessage] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const messageParam = searchParams.get('message')
+    if (messageParam === 'confirm_email') {
+      setConfirmationMessage('Please check your email and click the confirmation link to verify your account before signing in.')
+    }
+  }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,6 +64,22 @@ export default function SignInForm() {
           marginBottom: 20,
           color: '#333',
         }}>Sign In</h2>
+
+        {confirmationMessage && (
+          <div style={{
+            marginBottom: 20,
+            padding: 15,
+            backgroundColor: '#e3f2fd',
+            color: '#1565c0',
+            borderRadius: 4,
+            border: '1px solid #90caf9',
+            textAlign: 'center',
+            fontSize: 14,
+            lineHeight: '1.4',
+          }}>
+            📧 {confirmationMessage}
+          </div>
+        )}
 
         <form onSubmit={handleLogin}>
           <div style={{ marginBottom: 20 }}>
@@ -148,6 +173,28 @@ export default function SignInForm() {
             {message}
           </div>
         )}
+
+        <div style={{
+          marginTop: 20,
+          textAlign: 'center',
+        }}>
+          <p style={{
+            fontSize: 14,
+            color: '#666',
+            margin: 0,
+          }}>
+            Don&apos;t have an account?{' '}
+            <a 
+              href="/sign_up" 
+              style={{
+                color: '#007bff',
+                textDecoration: 'underline',
+              }}
+            >
+              Sign up
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   )
