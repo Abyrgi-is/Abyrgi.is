@@ -1,8 +1,6 @@
 "use client";
-import { createClient } from "@/utils/supabase/client";
+import { supabaseClient } from "@/utils/supabase/supabase-library";
 import { useEffect, useState } from "react";
-
-const supabase = createClient();
 
 export default function CarManager({ onCarChange }: { onCarChange: () => void }) {
     const [carData, setCarData] = useState({
@@ -21,11 +19,23 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
 
     useEffect(() => {
         const fetchUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUserId(user?.id || null);
+            const { user, error } = await supabaseClient.getCurrentUser();
+            if (!error && user) {
+                setUserId(user.id);
+                console.log("CarManager: User authenticated:", user.id);
+            } else {
+                setUserId(null);
+                console.log("CarManager: No user authenticated", error);
+            }
         };
 
         fetchUser();
+        
+        const interval = setInterval(fetchUser, 1000);
+        
+        return () => {
+            clearInterval(interval);
+        };
     }, []);
 
     async function handleAddCar() {
@@ -36,10 +46,13 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
 
         setMessage("Adding...");
         console.log("Authenticated Supabase UID:", userIdState);
-        const { data, error } = await supabase
-            .schema('abyrgi').from("cars")
-            .insert([{ ...carData, user_id: userIdState }])
-            .single();
+        
+        const { data, error } = await supabaseClient.insertRow(
+            "cars", 
+            { ...carData, user_id: userIdState }, 
+            "abyrgi"
+        );
+        
         console.log("user_id in insert payload:", userIdState);
         if (error) setMessage("Error: " + error.message);
         else {
@@ -58,11 +71,20 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
     }
 
     async function handleDeleteCar() {
+        if (!userIdState) {
+            setMessage("User not authenticated");
+            return;
+        }
+
         setMessage("Deleting...");
-        const { data, error } = await supabase
-            .schema('abyrgi').from("cars")
-            .delete()
-            .eq("plate", plateToDelete);
+        
+
+        const { data, error } = await supabaseClient.deleteRows(
+            "cars",
+            { column: "plate", value: plateToDelete },
+            "abyrgi"
+        );
+        
         if (error) setMessage("Error: " + error.message);
         else {
             setMessage("Car deleted!");
@@ -73,6 +95,7 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
 
     return (
         <div className="max-w-md mx-auto my-8 p-4 border rounded bg-white dark:bg-[#15121aff]">
+            
             <button
                 className="bg-blue-600 text-white px-4 py-2 rounded mb-4 w-full"
                 onClick={() => setShowPopup(true)}

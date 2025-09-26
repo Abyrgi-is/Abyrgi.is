@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { supabaseClient } from "@/utils/supabase/supabase-library";
 import CarManager from "@/app/minarsidur/CarManager";
 import CarsList from "@/app//minarsidur/CarsList";
 
@@ -20,7 +20,6 @@ export type Car = {
 
 // --- Main page ---
 export default function MinarsidurPage() {
-	const supabase = createClient();
 	const [cars, setCars] = useState<Car[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -28,30 +27,35 @@ export default function MinarsidurPage() {
 	const fetchCars = useCallback(async () => {
 		try {
 			setLoading(true);
-			const { data: userRes } = await supabase.auth.getUser();
-			const uid = userRes.user?.id;
-			if (!uid) {
+			setError(null);
+			
+			// Get current user from supabase library
+			const { user, error: userError } = await supabaseClient.getCurrentUser();
+			
+			if (userError || !user) {
 				setError("No authenticated user. Please sign in.");
 				setLoading(false);
 				return;
 			}
-			const { data, error } = await supabase
-				.schema("abyrgi")
-				.from("cars")
-				.select("*")
-				.eq("user_id", uid);
+			
+			// Use the library function to get cars by user
+			const { data, error } = await supabaseClient.getCarsByUser(
+				user.id, 
+				"abyrgi", 
+				{ table: "cars" }
+			);
+			
 			if (error) {
 				setError(error.message);
 			} else {
 				setCars((data as Car[]) ?? []);
-				setError(null);
 			}
 		} catch (e: unknown) {
 			setError(e instanceof Error ? e.message : "Unknown error while fetching cars");
 		} finally {
 			setLoading(false);
 		}
-	}, [supabase]);
+	}, []);
 
 	useEffect(() => {
 		fetchCars();
