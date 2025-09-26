@@ -1,9 +1,61 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { supabaseClient } from "@/utils/supabase/supabase-library";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userAuthenticated, setUserAuthenticated] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        // Use getSession() to read from local storage immediately
+        const { data: { session }, error } = await supabase.auth.getSession();
+        const isAuth = !!session?.user;
+        setUserAuthenticated(isAuth);
+
+      } catch (error) {
+        console.error("Auth check error:", error);
+        setUserAuthenticated(false);
+      }
+    };
+    
+    checkAuth();
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const isAuth = !!session?.user;
+      setUserAuthenticated(isAuth);
+
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase.auth]);
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabaseClient.signOut();
+      if (error) {
+        console.error("Sign out error:", error);
+        alert("Error signing out: " + error.message);
+        // Redirect to home page after sign out
+        router.push("/");
+        // Force reload to clear any cached state
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error("Unexpected sign out error:", err);
+      alert("Unexpected error signing out");
+    }
+  };
 
   useEffect(() => {
     function handleResize() {
@@ -24,6 +76,16 @@ export function Header() {
         <Link href="/about">About</Link>
         <Link href="/stillingar">Stillingar</Link>
         <Link href="/minarsidur">Mínar Síður</Link>
+        {userAuthenticated && (
+          <button
+            onClick={handleSignOut}
+            className="header-signout-button"
+            onMouseOver={(e) => (e.currentTarget.style.cursor = "pointer", e.currentTarget.style.textDecoration = "underline")}
+            onMouseOut={(e) => (e.currentTarget.style.textDecoration = "none")}
+          >
+            Sign out
+          </button>
+        )}
       </div>
       {/* "Hamborgari" fyrir minni skjá */}
       <button
@@ -65,6 +127,17 @@ export function Header() {
         onClick={() => setMenuOpen(false)}>
           Mínar Síður
         </Link>
+        {userAuthenticated && (
+          <button
+            onClick={() => {
+              setMenuOpen(false);
+              handleSignOut();
+            }}
+            className="header-dropdown-button"
+          >
+            Sign out
+          </button>
+        )}
       </div>
       <style jsx>{`
         .header-nav {
@@ -84,9 +157,12 @@ export function Header() {
           margin-left: auto;
         }
         .header-links a {
-          color: #0070f3;
+          color: inherit;
           text-decoration: none;
           padding: 0.5rem 0;
+        }
+        .header-links a:hover {
+          text-decoration: underline;
         }
         .header-hamburger {
           display: none;
@@ -108,15 +184,26 @@ export function Header() {
           min-width: 120px;
           z-index: 100;
         }
-        .header-dropdown a {
+        .header-dropdown a,
+        .header-dropdown-button {
           display: none;
           padding: 0.75rem 1rem;
           text-decoration: none;
           color: #0070f3;
           background: none;
+          border: none;
+          cursor: pointer;
+          text-align: left;
+          width: 100%;
+          font-size: inherit;
+          font-family: inherit;
+          transition: all 0.2s ease;
         }
-        .header-dropdown a:hover {
+        .header-dropdown a:hover,
+        .header-dropdown-button:hover {
           background: #f0f8ff;
+          text-decoration: underline;
+          cursor: pointer;
         }
         /* Responsive styles */
         @media (max-width: 700px) {
