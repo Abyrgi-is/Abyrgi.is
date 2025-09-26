@@ -85,6 +85,17 @@ export default function SimpleSupabaseCrudTest() {
 		await refreshCars()
 	}
 
+	const handleGetUserRole = async () => {
+		if (!userId) return addLine("Create a user first to get userId")
+		const { data, error } = await supabaseClient.getUserRole(userId)
+		if (error) return addLine(`Get user role error: ${error.message}`)
+		if (!data || data.length === 0) {
+			addLine(`No roles found for user ${userId}`)
+		} else {
+			addLine(`User roles: ${JSON.stringify(data.map(ur => ({ role: ur.roles?.role, description: ur.roles?.description })))}`)
+		}
+	}
+
 	return (
 		<div style={{ padding: 24 }}>
 			<h1>/supabase/simple-test — CRUD smoke test</h1>
@@ -93,6 +104,7 @@ export default function SimpleSupabaseCrudTest() {
 				<button onClick={handleCreateCar} style={{ padding: 8, border: "1px solid #ccc" }}>Create Car</button>
 				<button onClick={handleUpdateFirstCar} style={{ padding: 8, border: "1px solid #ccc" }}>Update First Car</button>
 				<button onClick={handleDeleteFirstCar} style={{ padding: 8, border: "1px solid #ccc" }}>Delete First Car</button>
+				<button onClick={handleGetUserRole} style={{ padding: 8, border: "1px solid #ccc" }}>Get User Role</button>
 				<button onClick={refreshUsers} style={{ padding: 8, border: "1px solid #ccc" }}>Refresh Users</button>
 				<button onClick={refreshCars} style={{ padding: 8, border: "1px solid #ccc" }}>Refresh Cars</button>
 			</div>
