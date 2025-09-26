@@ -285,6 +285,25 @@ export const supabaseClient = {
     return { data: { user, profile }, error: null }
   },
 
+  // Get user role(s) by user ID
+  getUserRole: async (userId: string, schema = 'abyrgi') => {
+    const { data, error } = await supabase
+      .schema(schema)
+      .from('user_roles')
+      .select(`
+        *,
+        roles (
+          id,
+          role,
+          description
+        )
+      `)
+      .eq('user_id', userId)
+    
+    if (error) return { data: null, error }
+    return { data, error: null }
+  },
+
   // One-call user creation: sign up; if session exists, write base profile then set a unique username
   createUser: async (
     userData: {
