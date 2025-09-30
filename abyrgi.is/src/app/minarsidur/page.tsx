@@ -13,7 +13,6 @@ export type Car = {
 	car_make: string;
 	car_model: string;
 	car_model_year: number;
-	car_vin: string;
 	color: string | null;
 	manual: boolean | null;
 	plate: string;
@@ -27,19 +26,24 @@ export default function MinarsidurPage() {
 	const [authChecked, setAuthChecked] = useState(false);
 	const router = useRouter();
 
-	// First ensure user is authenticated; if not, redirect.
 	useEffect(() => {
 		let isMounted = true;
-		(async () => {
-			const { user } = await supabaseClient.getCurrentUser();
+		
+		const checkAuth = async () => {
+			const { user, error } = await supabaseClient.getCurrentUser();
+			
 			if (!user && isMounted) {
-				// Redirect unauthenticated users away
-				router.replace("/?redirected=1");
+				router.replace("/sign_in?redirect=/minarsidur");
 			} else if (isMounted) {
 				setAuthChecked(true);
 			}
-		})();
-		return () => { isMounted = false; };
+		};
+		
+		checkAuth();
+		
+		return () => { 
+			isMounted = false; 
+		};
 	}, [router]);
 
 	const fetchCars = useCallback(async () => {
