@@ -375,4 +375,36 @@ export const supabaseClient = {
     }
   },
 
+  /**
+   * Place a new order in abyrgi.orders
+   * @param order - Order data (user_id, pickup_location_id, dropoff_location_id, staff_id?, notes?, status?)
+   * @returns Inserted order row or error
+   */
+  placeOrder: async (
+    order: {
+      user_id: string;
+      pickup_location_id: string;
+      dropoff_location_id: string;
+      staff_id?: string | null;
+      notes?: string | null;
+      status?: string;
+    }
+  ) => {
+    // Only allow certain fields to be inserted
+    const row = {
+      user_id: order.user_id,
+      pickup_location_id: order.pickup_location_id,
+      dropoff_location_id: order.dropoff_location_id,
+      staff_id: order.staff_id ?? null,
+      notes: order.notes ?? null,
+      status: order.status ?? 'pending',
+    }
+    const { data, error } = await supabase
+      .schema('abyrgi')
+      .from('orders')
+      .insert(row)
+      .select('*')
+      .single()
+    return { data, error }
+  },
 }
