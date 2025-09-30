@@ -75,7 +75,7 @@ export function Header() {
         <Link href="/"></Link>
         <Link href="/about">About</Link>
         <Link href="/stillingar">Stillingar</Link>
-        <Link href="/minarsidur">Mínar Síður</Link>
+        {userAuthenticated && <Link href="/minarsidur">Mínar Síður</Link>}
         {userAuthenticated && (
           <button
             onClick={handleSignOut}
@@ -117,6 +117,7 @@ export function Header() {
         onClick={() => setMenuOpen(false)}>
           Stillingar
         </Link>
+        {userAuthenticated && (
         <Link href="/minarsidur"
           style={{
             display: "block",
@@ -127,6 +128,7 @@ export function Header() {
         onClick={() => setMenuOpen(false)}>
           Mínar Síður
         </Link>
+        )}
         {userAuthenticated && (
           <button
             onClick={() => {
