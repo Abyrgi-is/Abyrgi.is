@@ -125,11 +125,10 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
                             }}
                             className="space-y-2"
                         >
-                            <input className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Make" value={carData.car_make} onChange={(e) => setCarData({ ...carData, car_make: e.target.value })} />
-                            <input className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Model" value={carData.car_model} onChange={(e) => setCarData({ ...carData, car_model: e.target.value })} />
-                            <input className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Year" value={carData.car_model_year} onChange={(e) => setCarData({ ...carData, car_model_year: e.target.value })} />
-                            <input className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="VIN" value={carData.car_vin} onChange={(e) => setCarData({ ...carData, car_vin: e.target.value })} />
-                            <input className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Color" value={carData.color} onChange={(e) => setCarData({ ...carData, color: e.target.value })} />
+                            <input required className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Make" value={carData.car_make} onChange={(e) => setCarData({ ...carData, car_make: e.target.value })} />
+                            <input required className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Model" value={carData.car_model} onChange={(e) => setCarData({ ...carData, car_model: e.target.value })} />
+                            <input required className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Year" value={carData.car_model_year} onChange={(e) => setCarData({ ...carData, car_model_year: e.target.value })} />
+                            <input required className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Color" value={carData.color} onChange={(e) => setCarData({ ...carData, color: e.target.value })} />
                             <label className="flex items-center space-x-2 text-gray-900 dark:text-gray-100">
                                 <input
                                     type="checkbox"
@@ -138,7 +137,7 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
                                 />
                                 <span>Manual</span>
                             </label>
-                            <input className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Plate" value={carData.plate} onChange={(e) => setCarData({ ...carData, plate: e.target.value })} />
+                            <input required className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Plate" value={carData.plate} onChange={(e) => setCarData({ ...carData, plate: e.target.value })} />
                             <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">Add Car</button>
                         </form>
 

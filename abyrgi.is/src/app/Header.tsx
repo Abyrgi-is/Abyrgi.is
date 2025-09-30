@@ -4,6 +4,7 @@ import Link from "next/link";
 import { supabaseClient } from "@/utils/supabase/supabase-library";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { cursorTo } from "readline";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -18,6 +19,7 @@ export function Header() {
         // Use getSession() to read from local storage immediately
         const { data: { session }, error } = await supabase.auth.getSession();
         const isAuth = !!session?.user;
+        console.log('Header auth check:', { session: !!session, user: !!session?.user, error });
         setUserAuthenticated(isAuth);
 
       } catch (error) {
@@ -31,6 +33,7 @@ export function Header() {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const isAuth = !!session?.user;
+      console.log('Header auth state change:', event, !!session?.user);
       setUserAuthenticated(isAuth);
 
     });
@@ -76,15 +79,15 @@ export function Header() {
         <Link href="/about">About</Link>
         <Link href="/stillingar">Stillingar</Link>
         {userAuthenticated && <Link href="/minarsidur">Mínar Síður</Link>}
-        {userAuthenticated && (
+        {userAuthenticated ? (
           <button
             onClick={handleSignOut}
-            className="header-signout-button"
-            onMouseOver={(e) => (e.currentTarget.style.cursor = "pointer", e.currentTarget.style.textDecoration = "underline")}
-            onMouseOut={(e) => (e.currentTarget.style.textDecoration = "none")}
-          >
+            onMouseOver={(e) => (e.currentTarget.style.cursor = "pointer")}
+            >
             Sign out
           </button>
+        ) : (
+          <Link href="/sign_in">Sign in</Link>
         )}
       </div>
       {/* "Hamborgari" fyrir minni skjá */}
@@ -129,16 +132,50 @@ export function Header() {
           Mínar Síður
         </Link>
         )}
-        {userAuthenticated && (
+        {userAuthenticated ? (
           <button
             onClick={() => {
               setMenuOpen(false);
               handleSignOut();
             }}
-            className="header-dropdown-button"
+            style={{
+              display: "block",
+              padding: "0.75rem 1rem",
+              textDecoration: "none",
+              color: "#0070f3",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              textAlign: "left",
+              width: "100%",
+              fontSize: "inherit",
+              fontFamily: "inherit",
+              transition: "all 0.2s ease",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = "#f0f8ff";
+              e.currentTarget.style.textDecoration = "underline";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = "none";
+              e.currentTarget.style.textDecoration = "none";
+            }}
           >
             Sign out
           </button>
+        ) : (
+          <Link
+            href="/sign_in"
+            style={{
+              display: "block",
+              padding: "0.75rem 1rem",
+              textDecoration: "none",
+              color: "#0070f3",
+            }}
+            onClick={() => setMenuOpen(false)}
+          >
+            Sign in
+          </Link>
         )}
       </div>
       <style jsx>{`

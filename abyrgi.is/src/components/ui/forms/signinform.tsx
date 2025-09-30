@@ -32,8 +32,9 @@ export default function SignInForm() {
         setMessage(`❌ Sign-in failed: ${error.message}`)
       } else {
         setMessage('✅ Sign-in successful!')
-        console.log('User data:', data)
-        router.push('/minarsidur')
+        // Redirect to the intended page or default to minarsidur
+        const redirectTo = searchParams.get('redirect') || '/minarsidur'
+        router.push(redirectTo)
       }
     } catch (err) {
       setMessage(`❌ Error: ${err}`)
