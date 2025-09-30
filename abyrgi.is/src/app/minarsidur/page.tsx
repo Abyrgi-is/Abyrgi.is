@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabaseClient } from "@/utils/supabase/supabase-library";
 import CarManager from "@/app/minarsidur/CarManager";
 import CarsList from "@/app//minarsidur/CarsList";
+import { useRouter } from "next/navigation";
 
 // --- Car type ---
 export type Car = {
@@ -23,28 +24,42 @@ export default function MinarsidurPage() {
 	const [cars, setCars] = useState<Car[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [authChecked, setAuthChecked] = useState(false);
+	const router = useRouter();
+
+	// First ensure user is authenticated; if not, redirect.
+	useEffect(() => {
+		let isMounted = true;
+		(async () => {
+			const { user } = await supabaseClient.getCurrentUser();
+			if (!user && isMounted) {
+				// Redirect unauthenticated users away
+				router.replace("/?redirected=1");
+			} else if (isMounted) {
+				setAuthChecked(true);
+			}
+		})();
+		return () => { isMounted = false; };
+	}, [router]);
 
 	const fetchCars = useCallback(async () => {
 		try {
 			setLoading(true);
 			setError(null);
-			
-			// Get current user from supabase library
+
 			const { user, error: userError } = await supabaseClient.getCurrentUser();
-			
 			if (userError || !user) {
 				setError("No authenticated user. Please sign in.");
 				setLoading(false);
 				return;
 			}
-			
-			// Use the library function to get cars by user
+
 			const { data, error } = await supabaseClient.getCarsByUser(
-				user.id, 
-				"abyrgi", 
+				user.id,
+				"abyrgi",
 				{ table: "cars" }
 			);
-			
+
 			if (error) {
 				setError(error.message);
 			} else {
@@ -58,8 +73,14 @@ export default function MinarsidurPage() {
 	}, []);
 
 	useEffect(() => {
-		fetchCars();
-	}, [fetchCars]);
+		if (authChecked) {
+			fetchCars();
+		}
+	}, [fetchCars, authChecked]);
+
+	if (!authChecked) {
+		return <div className="min-h-screen flex items-center justify-center">Hleð...</div>;
+	}
 
 	return (
 		<div className="min-h-screen">
