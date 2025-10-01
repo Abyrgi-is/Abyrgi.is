@@ -294,8 +294,7 @@ export const supabaseClient = {
         *,
         roles (
           id,
-          role,
-          description
+          role
         )
       `)
       .eq('user_id', userId)
