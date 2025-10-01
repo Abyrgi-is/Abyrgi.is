@@ -9,6 +9,8 @@ import { cursorTo } from "readline";
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userAuthenticated, setUserAuthenticated] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
+  const [isDriver, setIsDriver] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -16,11 +18,23 @@ export function Header() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Use getSession() to read from local storage immediately
-        const { data: { session }, error } = await supabase.auth.getSession();
-        const isAuth = !!session?.user;
-        console.log('Header auth check:', { session: !!session, user: !!session?.user, error });
+        // Use getCurrentUser from supabaseClient (works consistently)
+        const { user } = await supabaseClient.getCurrentUser();
+        const isAuth = !!user;
         setUserAuthenticated(isAuth);
+
+        // Load roles if authenticated
+        if (user) {
+          const { data: rolesData } = await supabaseClient.getUserRole(user.id);
+          if (rolesData) {
+            const roles = rolesData.map((r: any) => r?.roles?.role).filter(Boolean);
+            setIsStaff(roles.includes('staff'));
+            setIsDriver(roles.includes('driver'));
+          }
+        } else {
+          setIsStaff(false);
+          setIsDriver(false);
+        }
 
       } catch (error) {
         console.error("Auth check error:", error);
@@ -31,11 +45,22 @@ export function Header() {
     checkAuth();
     
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const isAuth = !!session?.user;
-      console.log('Header auth state change:', event, !!session?.user);
       setUserAuthenticated(isAuth);
 
+      // Load roles on auth change
+      if (session?.user) {
+        const { data: rolesData } = await supabaseClient.getUserRole(session.user.id);
+        if (rolesData) {
+          const roles = rolesData.map((r: any) => r?.roles?.role).filter(Boolean);
+          setIsStaff(roles.includes('staff'));
+          setIsDriver(roles.includes('driver'));
+        }
+      } else {
+        setIsStaff(false);
+        setIsDriver(false);
+      }
     });
     
     return () => {
@@ -46,6 +71,7 @@ export function Header() {
   const handleSignOut = async () => {
     try {
       const { error } = await supabaseClient.signOut();
+      router.push("/");
       if (error) {
         console.error("Sign out error:", error);
         alert("Error signing out: " + error.message);
@@ -75,15 +101,27 @@ export function Header() {
       <span className="header-logo"><Link href="/">Abyrgi.is</Link></span>
       {/* Stór skjár links */}
       <div className="header-links">
-        <Link href="/"></Link>
         <Link href="/about">About</Link>
         <Link href="/stillingar">Stillingar</Link>
         {userAuthenticated && <Link href="/minarsidur">Mínar Síður</Link>}
+        {isDriver && <Link href="/pickup">Pickup</Link>}
+        {(isStaff || isDriver) && <Link href="/dropoff">Dropoff</Link>}
         {userAuthenticated ? (
           <button
             onClick={handleSignOut}
-            onMouseOver={(e) => (e.currentTarget.style.cursor = "pointer")}
-            >
+            style={{ 
+              background: 'none',
+              border: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              padding: '0',
+              margin: '0',
+              font: 'inherit',
+              textDecoration: 'none'
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+            onMouseOut={(e) => (e.currentTarget.style.textDecoration = 'none')}
+          >
             Sign out
           </button>
         ) : (
@@ -137,20 +175,6 @@ export function Header() {
             onClick={() => {
               setMenuOpen(false);
               handleSignOut();
-            }}
-            style={{
-              display: "block",
-              padding: "0.75rem 1rem",
-              textDecoration: "none",
-              color: "#0070f3",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              textAlign: "left",
-              width: "100%",
-              fontSize: "inherit",
-              fontFamily: "inherit",
-              transition: "all 0.2s ease",
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.background = "#f0f8ff";
