@@ -320,6 +320,7 @@ export const supabaseClient = {
     }
   ) => {
     const schema = options?.schema ?? 'abyrgi'
+    const defaultRole = options?.defaultRole ?? 'user'
     const desiredUsername = slugifyUsername(userData.username || userData.email.split('@')[0])
 
     try {
@@ -354,11 +355,9 @@ export const supabaseClient = {
       const setRes = await supabaseClient.setProfileUsernameUnique(authData.user.id, desiredUsername, schema)
       if (setRes.error) return { data: null, error: setRes.error, step: 'profile_username' }
 
-      // Optional default role
-      if (options?.defaultRole) {
-        const { error: roleErr } = await supabaseClient.assignRoleToUser(authData.user.id, options.defaultRole, schema)
-        if (roleErr) return { data: null, error: roleErr, step: 'role' }
-      }
+      // Assign default role (defaults to 'user' if not specified)
+      const { error: roleErr } = await supabaseClient.assignRoleToUser(authData.user.id, defaultRole, schema)
+      if (roleErr) return { data: null, error: roleErr, step: 'role' }
 
       // Return profile
       const { data: profile, error: profReadErr } = await supabase
