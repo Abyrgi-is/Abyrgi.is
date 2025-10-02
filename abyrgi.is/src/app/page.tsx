@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { supabaseClient } from "@/utils/supabase/supabase-library";
 
 function HeroSection() {
   return (
@@ -57,8 +57,7 @@ function OrderButton() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const { user } = await supabaseClient.getCurrentUser();
       setIsAuthenticated(!!user);
       setIsLoading(false);
     };
