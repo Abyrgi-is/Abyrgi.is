@@ -16,26 +16,45 @@ export function Header() {
 
   // Check authentication status
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Use getCurrentUser from supabaseClient (works consistently)
-        const { user } = await supabaseClient.getCurrentUser();
-        const isAuth = !!user;
-        setUserAuthenticated(isAuth);
+    // Listen for auth state changes FIRST - this fires immediately with cached session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const isAuth = !!session?.user;
+      setUserAuthenticated(isAuth);
 
-        // Load roles if authenticated
-        if (user) {
-          const { data: rolesData } = await supabaseClient.getUserRole(user.id);
+      // Load roles on auth change
+      if (session?.user) {
+        supabaseClient.getUserRole(session.user.id).then(({ data: rolesData }) => {
           if (rolesData) {
             const roles = rolesData.map((r: any) => r?.roles?.role).filter(Boolean);
             setIsStaff(roles.includes('staff'));
             setIsDriver(roles.includes('driver'));
           }
+        });
+      } else {
+        setIsStaff(false);
+        setIsDriver(false);
+      }
+    });
+
+    // Also do an explicit check
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const isAuth = !!session?.user;
+        setUserAuthenticated(isAuth);
+
+        if (session?.user) {
+          supabaseClient.getUserRole(session.user.id).then(({ data: rolesData }) => {
+            if (rolesData) {
+              const roles = rolesData.map((r: any) => r?.roles?.role).filter(Boolean);
+              setIsStaff(roles.includes('staff'));
+              setIsDriver(roles.includes('driver'));
+            }
+          });
         } else {
           setIsStaff(false);
           setIsDriver(false);
         }
-
       } catch (error) {
         console.error("Auth check error:", error);
         setUserAuthenticated(false);
@@ -43,25 +62,6 @@ export function Header() {
     };
     
     checkAuth();
-    
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const isAuth = !!session?.user;
-      setUserAuthenticated(isAuth);
-
-      // Load roles on auth change
-      if (session?.user) {
-        const { data: rolesData } = await supabaseClient.getUserRole(session.user.id);
-        if (rolesData) {
-          const roles = rolesData.map((r: any) => r?.roles?.role).filter(Boolean);
-          setIsStaff(roles.includes('staff'));
-          setIsDriver(roles.includes('driver'));
-        }
-      } else {
-        setIsStaff(false);
-        setIsDriver(false);
-      }
-    });
     
     return () => {
       subscription.unsubscribe();
@@ -104,6 +104,7 @@ export function Header() {
         <Link href="/about">About</Link>
         <Link href="/stillingar">Stillingar</Link>
         {userAuthenticated && <Link href="/minarsidur">Mínar Síður</Link>}
+        {userAuthenticated && <Link href="/stadsetnig">Panta</Link>}
         {isDriver && <Link href="/pickup">Pickup</Link>}
         {(isStaff || isDriver) && <Link href="/dropoff">Dropoff</Link>}
         {userAuthenticated ? (
@@ -170,6 +171,16 @@ export function Header() {
           Mínar Síður
         </Link>
         )}
+        <Link href="/stadsetnig"
+          style={{
+            display: "block",
+            padding: "0.75rem 1rem",
+            textDecoration: "none",
+            color: "#0070f3",
+          }}
+        onClick={() => setMenuOpen(false)}>
+          Panta
+        </Link>
         {userAuthenticated ? (
           <button
             onClick={() => {
