@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabaseClient } from '@/utils/supabase/supabase-library';
+import React, { useState } from 'react';
+import { AuthGuard } from '@/components/auth';
 import LocationInput from '@/components/ui/LocationInput';
 import CarSelector from '@/components/ui/CarSelector';
 import ContinueButton from '@/components/ui/ContinueButton';
@@ -18,37 +17,11 @@ interface Car {
   year: number;
 }
 
-export default function StadsetnigPage() {
+function StadsetnigPageContent() {
   const [location, setLocation] = useState('');
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [coordinates, setCoordinates] = useState<GeolocationCoordinates | null>(null);
   const [mapLocation, setMapLocation] = useState<[number, number] | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const checkAuth = async () => {
-      const { user, error } = await supabaseClient.getCurrentUser();
-      
-      if (!user && isMounted) {
-        router.replace("/sign_in?redirect=/stadsetnig");
-      } else if (isMounted) {
-        setAuthChecked(true);
-      }
-    };
-    
-    checkAuth();
-    
-    return () => { 
-      isMounted = false; 
-    };
-  }, [router]);
-
-  if (!authChecked) {
-    return <div>Loading...</div>;
-  }
 
   const handleLocationChange = (location: string, coords?: GeolocationCoordinates) => {
     setLocation(location);
@@ -131,5 +104,13 @@ export default function StadsetnigPage() {
 
 
     </div>
+  );
+}
+
+export default function StadsetnigPage() {
+  return (
+    <AuthGuard redirectTo="/stadsetnig">
+      <StadsetnigPageContent />
+    </AuthGuard>
   );
 }

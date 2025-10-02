@@ -1,36 +1,15 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabaseClient } from '@/utils/supabase/supabase-library';
+import { AuthGuard } from '@/components/auth';
+
+function StadfestaPageContent() {
+    return <div>Staðfesta Page</div>;
+}
 
 export default function StadfestaPage() {
-    const [authChecked, setAuthChecked] = useState(false);
-    const router = useRouter();
-
-    useEffect(() => {
-        let isMounted = true;
-        
-        const checkAuth = async () => {
-            const { user, error } = await supabaseClient.getCurrentUser();
-            
-            if (!user && isMounted) {
-                router.replace("/sign_in?redirect=/stadfesta");
-            } else if (isMounted) {
-                setAuthChecked(true);
-            }
-        };
-        
-        checkAuth();
-        
-        return () => { 
-            isMounted = false; 
-        };
-    }, [router]);
-
-    if (!authChecked) {
-        return <div>Loading...</div>;
-    }
-
-    return <div>Staðfesta Page</div>;
+    return (
+        <AuthGuard redirectTo="/stadfesta">
+            <StadfestaPageContent />
+        </AuthGuard>
+    );
 }
