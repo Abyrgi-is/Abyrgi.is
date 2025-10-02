@@ -71,11 +71,11 @@ export function Header() {
   const handleSignOut = async () => {
     try {
       const { error } = await supabaseClient.signOut();
-      router.push("/");
       if (error) {
         console.error("Sign out error:", error);
         alert("Error signing out: " + error.message);
-        // Redirect to home page after sign out
+      } else {
+        // Redirect to home page after successful sign out
         router.push("/");
         // Force reload to clear any cached state
         window.location.reload();

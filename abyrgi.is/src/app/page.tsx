@@ -1,6 +1,8 @@
 "use client";
-import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabaseClient } from "@/utils/supabase/supabase-library";
 
 function HeroSection() {
   return (
@@ -49,27 +51,49 @@ function ServiceList() {
 }
 
 function OrderButton() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { user } = await supabaseClient.getCurrentUser();
+      setIsAuthenticated(!!user);
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, []);
+
+  const handleClick = () => {
+    if (isAuthenticated) {
+      router.push("/stadsetnig");
+    } else {
+      router.push("/sign_up");
+    }
+  };
+
   return (
     <>
       {/* Desktop button */}
       <div className="hidden md:flex justify-center my-8">
-        <Link href="/sign_up" className="no-underline">
-          <button
-            className="w-100 py-5 text-lg rounded-xl bg-[#E7ECEF] text-gray-900 shadow-lg hover:bg-[#d4e3ed] transition font-semibold border border-gray-300 cursor-pointer"
-          >
-            Panta
-          </button>
-        </Link>
+        <button
+          onClick={handleClick}
+          disabled={isLoading}
+          className="w-100 py-5 text-lg rounded-xl bg-[#E7ECEF] text-gray-900 shadow-lg hover:bg-[#d4e3ed] transition font-semibold border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Panta
+        </button>
       </div>
       {/* Mobile button */}
       <div className="md:hidden">
-        <Link href="/sign_up" className="no-underline">
-          <button
-            className="fixed left-[5vw] right-[5vw] bottom-4 w-[90vw] py-4 text-lg rounded-xl bg-[#E7ECEF] text-gray-900 shadow-lg z-50 hover:bg-[#d4e3ed] transition font-semibold border border-gray-300 cursor-pointer"
-          >
-            Panta
-          </button>
-        </Link>
+        <button
+          onClick={handleClick}
+          disabled={isLoading}
+          className="fixed left-[5vw] right-[5vw] bottom-4 w-[90vw] py-4 text-lg rounded-xl bg-[#E7ECEF] text-gray-900 shadow-lg z-50 hover:bg-[#d4e3ed] transition font-semibold border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Panta
+        </button>
       </div>
     </>
   );
