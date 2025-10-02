@@ -4,12 +4,12 @@ import { createClient } from '@/utils/supabase/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { pickupLocation, dropoffLocation, carId, notes } = body;
+    const { pickupLocation, dropoffLocation, carId, carInfo, notes } = body;
 
     // Validate required fields
-    if (!pickupLocation || !dropoffLocation || !carId) {
+    if (!pickupLocation || !dropoffLocation) {
       return NextResponse.json(
-        { error: 'Missing required fields: pickupLocation, dropoffLocation, carId' },
+        { error: 'Missing required fields: pickupLocation, dropoffLocation' },
         { status: 400 }
       );
     }
@@ -67,18 +67,36 @@ export async function POST(request: Request) {
       );
     }
 
+    // Prepare order data
+    const orderData: {
+      user_id: string;
+      pickup_location_id: string;
+      dropoff_location_id: string;
+      car_id?: string | null;
+      notes?: string | null;
+      status: string;
+    } = {
+      user_id: user.id,
+      pickup_location_id: pickupLocationData.id,
+      dropoff_location_id: dropoffLocationData.id,
+      notes: notes || null,
+      status: 'pending',
+    };
+
+    // Include car_id if provided, otherwise include car info in notes
+    if (carId) {
+      orderData.car_id = carId;
+    } else if (carInfo) {
+      // If no car_id, include car details in notes
+      const carNotes = `Car: ${carInfo.make} ${carInfo.model} (${carInfo.licensePlate})`;
+      orderData.notes = orderData.notes ? `${orderData.notes}\n${carNotes}` : carNotes;
+    }
+
     // Create the order
-    const { data: orderData, error: orderError } = await supabase
+    const { data: createdOrder, error: orderError } = await supabase
       .schema('abyrgi')
       .from('orders')
-      .insert({
-        user_id: user.id,
-        pickup_location_id: pickupLocationData.id,
-        dropoff_location_id: dropoffLocationData.id,
-        car_id: carId,
-        notes: notes || null,
-        status: 'pending',
-      })
+      .insert(orderData)
       .select('*')
       .single();
 
@@ -92,7 +110,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      order: orderData,
+      order: createdOrder,
     });
   } catch (error) {
     console.error('Unexpected error:', error);

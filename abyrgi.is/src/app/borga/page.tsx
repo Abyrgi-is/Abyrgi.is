@@ -87,8 +87,8 @@ export default function BorgaPage() {
                 body: JSON.stringify({
                     pickupLocation,
                     dropoffLocation: dropoffLocationData,
-                    carId: bookingData.selectedCar?.id,
-                    notes: `Car: ${bookingData.selectedCar?.make} ${bookingData.selectedCar?.model} (${bookingData.selectedCar?.licensePlate})`
+                    carInfo: bookingData.selectedCar,
+                    notes: `Additional info: ${bookingData.timestamp}`
                 }),
             });
 
