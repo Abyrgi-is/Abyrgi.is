@@ -405,4 +405,45 @@ export const supabaseClient = {
       .single()
     return { data, error }
   },
+
+  /**
+   * Place a booking order with location coordinates and car info
+   * @param booking - Booking data with pickup location, car_id, and optional dropoff
+   * @returns Inserted booking row or error
+   */
+  placeBooking: async (
+    booking: {
+      user_id: string;
+      car_id: string;
+      pickup_location: string;
+      pickup_latitude?: number | null;
+      pickup_longitude?: number | null;
+      dropoff_location?: string | null;
+      dropoff_latitude?: number | null;
+      dropoff_longitude?: number | null;
+      status?: string;
+      notes?: string | null;
+    },
+    schema = 'abyrgi'
+  ) => {
+    const row = {
+      user_id: booking.user_id,
+      car_id: booking.car_id,
+      pickup_location: booking.pickup_location,
+      pickup_latitude: booking.pickup_latitude ?? null,
+      pickup_longitude: booking.pickup_longitude ?? null,
+      dropoff_location: booking.dropoff_location ?? null,
+      dropoff_latitude: booking.dropoff_latitude ?? null,
+      dropoff_longitude: booking.dropoff_longitude ?? null,
+      status: booking.status ?? 'pending',
+      notes: booking.notes ?? null,
+    }
+    const { data, error } = await supabase
+      .schema(schema)
+      .from('bookings')
+      .insert(row)
+      .select('*')
+      .single()
+    return { data, error }
+  },
 }
