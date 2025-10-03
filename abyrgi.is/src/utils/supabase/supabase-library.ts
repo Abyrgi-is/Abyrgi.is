@@ -383,6 +383,7 @@ export const supabaseClient = {
       user_id: string;
       pickup_location_id: string;
       dropoff_location_id: string;
+      car_id?: string | null;
       staff_id?: string | null;
       notes?: string | null;
       status?: string;
@@ -393,6 +394,7 @@ export const supabaseClient = {
       user_id: order.user_id,
       pickup_location_id: order.pickup_location_id,
       dropoff_location_id: order.dropoff_location_id,
+      car_id: order.car_id ?? null,
       staff_id: order.staff_id ?? null,
       notes: order.notes ?? null,
       status: order.status ?? 'pending',
@@ -441,6 +443,37 @@ export const supabaseClient = {
     const { data, error } = await supabase
       .schema(schema)
       .from('bookings')
+      .insert(row)
+      .select('*')
+      .single()
+    return { data, error }
+  },
+
+  /**
+   * Create a new location in the locations table
+   * @param location - Location data with name, address, coordinates, and user_id
+   * @returns Inserted location row or error
+   */
+  createLocation: async (
+    location: {
+      name?: string | null;
+      address?: string | null;
+      latitude: number;
+      longitude: number;
+      user_id: string;
+    },
+    schema = 'abyrgi'
+  ) => {
+    const row = {
+      name: location.name ?? null,
+      address: location.address ?? null,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      user_id: location.user_id,
+    }
+    const { data, error } = await supabase
+      .schema(schema)
+      .from('locations')
       .insert(row)
       .select('*')
       .single()
