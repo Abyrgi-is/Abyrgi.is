@@ -65,7 +65,12 @@ function StadsetnigPageContent() {
         selectedCar,
         timestamp: new Date().toISOString(),
       };
-      localStorage.setItem('bookingData', JSON.stringify(bookingData));
+      
+      try {
+        localStorage.setItem('bookingData', JSON.stringify(bookingData));
+      } catch (error) {
+        console.error('Failed to save booking data to localStorage:', error);
+      }
     }
   };
 

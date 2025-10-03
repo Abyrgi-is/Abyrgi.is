@@ -11,9 +11,11 @@ interface ContinueButtonProps {
 export default function ContinueButton({ disabled = false, onClick }: ContinueButtonProps) {
   const router = useRouter();
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (onClick) {
       onClick();
+      // Small delay to ensure localStorage is written
+      await new Promise(resolve => setTimeout(resolve, 10));
     }
     router.push("/borga");
   };
