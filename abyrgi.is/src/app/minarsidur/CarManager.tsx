@@ -94,20 +94,20 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
     }
 
     return (
-        <div className="max-w-md mx-auto my-8 p-4 border rounded bg-white dark:bg-[#15121aff]">
-            
+        <div className="max-w-md mx-auto my-8 p-4 border rounded themed-card shadow-md">
             <button
-                className="themed-button px-4 py-2 rounded mb-4 w-full"
+                className="bg-blue-600 text-white px-4 py-2 rounded mb-4 w-full hover:bg-blue-700 transition-colors"
                 onClick={() => setShowPopup(true)}
             >
                 Add/Delete Car
             </button>
 
             {showPopup && (
-                <div className="fixed inset-0 flex items-center justify-center z-50 themed-modal-overlay">
-                    <div className="themed-card p-6 rounded shadow-lg max-w-md w-full relative">
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-md"></div>
+                    <div className="bg-background text-foreground p-6 rounded shadow-xl max-w-md w-full relative border border-border z-10">
                         <button
-                            className="absolute top-2 right-2 opacity-60 hover:opacity-80"
+                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                             onClick={() => setShowPopup(false)}
                         >
                             &times;
@@ -120,10 +120,10 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
                             }}
                             className="space-y-2"
                         >
-                            <input required className="themed-input p-2 w-full rounded" placeholder="Make" value={carData.car_make} onChange={(e) => setCarData({ ...carData, car_make: e.target.value })} />
-                            <input required className="themed-input p-2 w-full rounded" placeholder="Model" value={carData.car_model} onChange={(e) => setCarData({ ...carData, car_model: e.target.value })} />
-                            <input required className="themed-input p-2 w-full rounded" placeholder="Year" value={carData.car_model_year} onChange={(e) => setCarData({ ...carData, car_model_year: e.target.value })} />
-                            <input required className="themed-input p-2 w-full rounded" placeholder="Color" value={carData.color} onChange={(e) => setCarData({ ...carData, color: e.target.value })} />
+                            <input required className="themed-input w-full p-2 rounded" placeholder="Make" value={carData.car_make} onChange={(e) => setCarData({ ...carData, car_make: e.target.value })} />
+                            <input required className="themed-input w-full p-2 rounded" placeholder="Model" value={carData.car_model} onChange={(e) => setCarData({ ...carData, car_model: e.target.value })} />
+                            <input required className="themed-input w-full p-2 rounded" placeholder="Year" value={carData.car_model_year} onChange={(e) => setCarData({ ...carData, car_model_year: e.target.value })} />
+                            <input required className="themed-input w-full p-2 rounded" placeholder="Color" value={carData.color} onChange={(e) => setCarData({ ...carData, color: e.target.value })} />
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
@@ -132,8 +132,8 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
                                 />
                                 <span>Manual</span>
                             </label>
-                            <input required className="themed-input p-2 w-full rounded" placeholder="Plate" value={carData.plate} onChange={(e) => setCarData({ ...carData, plate: e.target.value })} />
-                            <button type="submit" className="themed-button px-4 py-2 rounded w-full">Add Car</button>
+                            <input required className="themed-input w-full p-2 rounded" placeholder="Plate" value={carData.plate} onChange={(e) => setCarData({ ...carData, plate: e.target.value })} />
+                            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700 transition-colors">Add Car</button>
                         </form>
 
                         <h2 className="text-xl font-bold mt-8 mb-4">Delete Car</h2>
@@ -144,8 +144,8 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
                             }}
                             className="space-y-2"
                         >
-                            <input className="themed-input p-2 w-full rounded" placeholder="Plate to delete" value={plateToDelete} onChange={(e) => setPlateToDelete(e.target.value)} />
-                            <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded w-full">Delete Car</button>
+                            <input className="themed-input w-full p-2 rounded" placeholder="Plate to delete" value={plateToDelete} onChange={(e) => setPlateToDelete(e.target.value)} />
+                            <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded w-full hover:bg-red-700 transition-colors">Delete Car</button>
                         </form>
 
                         {message && <p className="mt-4 text-center">{message}</p>}
