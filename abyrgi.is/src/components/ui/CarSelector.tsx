@@ -104,13 +104,13 @@ export default function CarSelector({ onCarSelect }: CarSelectorProps) {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-semibold text-lg">
+                  <h3 className="font-semibold text-lg text-gray-500 dark:text-gray-500">
                     {car.make} {car.model}
                   </h3>
-                  <p className="text-gray-600">{car.color} • {car.year}</p>
+                  <p className="text-gray-500 dark:text-gray-500">{car.color} • {car.year}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-mono text-lg">{car.licensePlate}</p>
+                  <p className="font-mono text-lg text-gray-500 dark:text-gray-500">{car.licensePlate}</p>
                   {selectedCar?.id === car.id && (
                     <span className="inline-block w-4 h-4 bg-blue-600 rounded-full mt-1"></span>
                   )}
@@ -122,7 +122,7 @@ export default function CarSelector({ onCarSelect }: CarSelectorProps) {
       )}
       
       {!loading && !error && cars.length === 0 && (
-        <p className="text-gray-600 text-center py-8">
+        <p className="text-gray-600 dark:text-gray-300 text-center py-8">
           Þú hefur ekki skráða bíla. Farðu í stillingar til að bæta við bíl.
         </p>
       )}

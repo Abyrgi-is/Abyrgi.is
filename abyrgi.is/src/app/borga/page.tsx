@@ -65,40 +65,40 @@ export default function BorgaPage() {
         
         <div className="max-w-2xl mx-auto p-6 space-y-6">
             <div className="text-center">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-3xl font-bold text-gray-600 dark:text-gray-100 mb-2">
                     Borga
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-300">
                     Farðu yfir pöntunina þína og borgaðu
                 </p>
             </div>
 
             {/* Selected Car Information */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-semibold mb-4">Valinn bíll</h2>
-                <div className="border-2 border-blue-600 bg-blue-50 p-4 rounded-lg">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Valinn bíll</h2>
+                <div className="border-2 border-blue-600 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                     <div className="flex justify-between items-start">
                         <div>
-                            <h3 className="font-semibold text-lg">
+                            <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
                                 {bookingData.selectedCar.make || bookingData.selectedCar.car_make} {bookingData.selectedCar.model || bookingData.selectedCar.car_model}
                             </h3>
-                            <p className="text-gray-600">
+                            <p className="text-gray-600 dark:text-gray-300">
                                 {bookingData.selectedCar.color} • {bookingData.selectedCar.year || bookingData.selectedCar.car_model_year}
                             </p>
                         </div>
                         <div className="text-right">
-                            <p className="font-mono text-lg">{bookingData.selectedCar.licensePlate || bookingData.selectedCar.plate}</p>
+                            <p className="font-mono text-lg text-gray-900 dark:text-gray-100">{bookingData.selectedCar.licensePlate || bookingData.selectedCar.plate}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Location Information */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-semibold mb-4">Staðsetning</h2>
-                <p className="text-gray-700">{bookingData.location}</p>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Staðsetning</h2>
+                <p className="text-gray-700 dark:text-gray-200">{bookingData.location}</p>
                 {bookingData.mapLocation && (
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                         Coordinates: {bookingData.mapLocation[0].toFixed(6)}, {bookingData.mapLocation[1].toFixed(6)}
                     </p>
                 )}
@@ -106,18 +106,18 @@ export default function BorgaPage() {
 
             {/* Pricing */}
             <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-semibold mb-4">Verðlag</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Verðlag</h2>
                 <div className="text-lg text-gray-700 space-y-2">
                     <p>Verð start gjald: <span className="font-semibold">1000kr</span></p>
                     <p>Km verð: <span className="font-semibold">250kr</span></p>
                     <p className="text-sm text-gray-500">
-                        (Þetta er alvöru borga, þetta virkar ekki í bara að ýtta á takkann)
+                        (Þetta er ekki alvöru borga, bara ýta á takkann og halda áfram)
                     </p>
                 </div>
             </div>
 
             {/* Payment Button */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <div className="flex justify-center">
                     <OrderButton />
                 </div>
