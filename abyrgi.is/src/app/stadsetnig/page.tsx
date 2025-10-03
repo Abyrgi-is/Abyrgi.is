@@ -77,29 +77,29 @@ function StadsetnigPageContent() {
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold mb-2">
           Staðsetning og bíll
         </h1>
-        <p className="text-gray-600">
+        <p className="opacity-70">
           Veldu staðsetningu bílsins og hvaða bíl á að sækja
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
+      <div className="surface-elevated rounded-xl shadow-xl p-8 space-y-8 border-2 border-white/20">
         <LocationInput onLocationChange={handleLocationChange} />
         
-        <div className="border-t pt-6">
+        <div className="border-t border-gray-200/30 pt-8">
           <LocationMap 
             onLocationSelect={handleMapLocationSelect}
             selectedLocation={mapLocation}
           />
         </div>
         
-        <div className="border-t pt-6">
+        <div className="border-t border-gray-200/30 pt-8">
           <CarSelector onCarSelect={handleCarSelect} />
         </div>
 
-        <div className="border-t pt-6">
+        <div className="border-t border-gray-200/30 pt-8">
           <ContinueButton 
             disabled={!isFormValid} 
             onClick={handleContinue}

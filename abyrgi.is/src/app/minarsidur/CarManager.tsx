@@ -97,27 +97,22 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
         <div className="max-w-md mx-auto my-8 p-4 border rounded bg-white dark:bg-[#15121aff]">
             
             <button
-                className="bg-blue-600 text-white px-4 py-2 rounded mb-4 w-full"
+                className="themed-button px-4 py-2 rounded mb-4 w-full"
                 onClick={() => setShowPopup(true)}
             >
                 Add/Delete Car
             </button>
 
             {showPopup && (
-                <div className="fixed inset-0 flex items-center justify-center z-50"
-                    style={{
-                        background: "rgba(30, 41, 59, 0.55)", // slate-800 with 55% opacity
-                        backdropFilter: "blur(4px)"
-                    }}
-                >
-                    <div className="bg-white dark:bg-[#15121aff] p-6 rounded shadow-lg max-w-md w-full relative border dark:border-gray-700">
+                <div className="fixed inset-0 flex items-center justify-center z-50 themed-modal-overlay">
+                    <div className="themed-card p-6 rounded shadow-lg max-w-md w-full relative">
                         <button
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            className="absolute top-2 right-2 opacity-60 hover:opacity-80"
                             onClick={() => setShowPopup(false)}
                         >
                             &times;
                         </button>
-                        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Add Car</h2>
+                        <h2 className="text-xl font-bold mb-4">Add Car</h2>
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault();
@@ -125,11 +120,11 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
                             }}
                             className="space-y-2"
                         >
-                            <input required className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Make" value={carData.car_make} onChange={(e) => setCarData({ ...carData, car_make: e.target.value })} />
-                            <input required className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Model" value={carData.car_model} onChange={(e) => setCarData({ ...carData, car_model: e.target.value })} />
-                            <input required className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Year" value={carData.car_model_year} onChange={(e) => setCarData({ ...carData, car_model_year: e.target.value })} />
-                            <input required className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Color" value={carData.color} onChange={(e) => setCarData({ ...carData, color: e.target.value })} />
-                            <label className="flex items-center space-x-2 text-gray-900 dark:text-gray-100">
+                            <input required className="themed-input p-2 w-full rounded" placeholder="Make" value={carData.car_make} onChange={(e) => setCarData({ ...carData, car_make: e.target.value })} />
+                            <input required className="themed-input p-2 w-full rounded" placeholder="Model" value={carData.car_model} onChange={(e) => setCarData({ ...carData, car_model: e.target.value })} />
+                            <input required className="themed-input p-2 w-full rounded" placeholder="Year" value={carData.car_model_year} onChange={(e) => setCarData({ ...carData, car_model_year: e.target.value })} />
+                            <input required className="themed-input p-2 w-full rounded" placeholder="Color" value={carData.color} onChange={(e) => setCarData({ ...carData, color: e.target.value })} />
+                            <label className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
                                     checked={carData.manual}
@@ -137,11 +132,11 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
                                 />
                                 <span>Manual</span>
                             </label>
-                            <input required className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Plate" value={carData.plate} onChange={(e) => setCarData({ ...carData, plate: e.target.value })} />
-                            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">Add Car</button>
+                            <input required className="themed-input p-2 w-full rounded" placeholder="Plate" value={carData.plate} onChange={(e) => setCarData({ ...carData, plate: e.target.value })} />
+                            <button type="submit" className="themed-button px-4 py-2 rounded w-full">Add Car</button>
                         </form>
 
-                        <h2 className="text-xl font-bold mt-8 mb-4 text-gray-900 dark:text-gray-100">Delete Car</h2>
+                        <h2 className="text-xl font-bold mt-8 mb-4">Delete Car</h2>
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault();
@@ -149,11 +144,11 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
                             }}
                             className="space-y-2"
                         >
-                            <input className="border p-2 w-full bg-white dark:bg-[#15121aff] text-gray-900 dark:text-gray-100" placeholder="Plate to delete" value={plateToDelete} onChange={(e) => setPlateToDelete(e.target.value)} />
+                            <input className="themed-input p-2 w-full rounded" placeholder="Plate to delete" value={plateToDelete} onChange={(e) => setPlateToDelete(e.target.value)} />
                             <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded w-full">Delete Car</button>
                         </form>
 
-                        {message && <p className="mt-4 text-center text-gray-900 dark:text-gray-100">{message}</p>}
+                        {message && <p className="mt-4 text-center">{message}</p>}
                     </div>
                 </div>
             )}

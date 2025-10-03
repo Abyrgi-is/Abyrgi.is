@@ -85,7 +85,7 @@ const SignupForm: React.FC = () => {
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
       <form
         onSubmit={handleSubmit}
-        className="max-w-md mx-auto p-6 bg-white rounded-lg shadow border border-gray-200 space-y-4"
+        className="max-w-md mx-auto p-6 themed-card rounded-lg shadow space-y-4"
       >
         <div className="space-y-1">
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -169,7 +169,7 @@ const SignupForm: React.FC = () => {
           disabled={loading}
           className={`w-full py-2 px-4 rounded focus:ring-2 focus:ring-blue-500 ${
             loading
-              ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+              ? 'themed-button opacity-50 cursor-not-allowed'
               : 'bg-blue-500 text-white hover:bg-blue-600'
           }`}
         >

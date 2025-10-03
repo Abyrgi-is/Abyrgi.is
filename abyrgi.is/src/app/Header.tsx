@@ -97,7 +97,7 @@ export function Header() {
   }, [menuOpen]);
 
   return (
-    <nav className="header-nav bg-gray-800">
+    <nav className="header-nav" style={{ backgroundColor: '#95818D', border:'none' }}>
       <span className="header-logo"><Link href="/">Abyrgi.is</Link></span>
       {/* Stór skjár links */}
       <div className="header-links">

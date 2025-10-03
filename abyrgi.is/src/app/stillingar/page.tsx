@@ -58,12 +58,12 @@ export default function StillingarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6">
+    <div className="themed-page p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">Stillingar</h1>
         
         {/* Theme Settings */}
-        <div className="bg-card rounded-lg shadow-sm border p-6 mb-6">
+        <div className="themed-card rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">🎨 Útlit</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -86,7 +86,7 @@ export default function StillingarPage() {
                 id="language"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md bg-background text-foreground focus:ring-primary focus:border-primary"
+                className="px-3 py-2 themed-input rounded-md focus:ring-primary focus:border-primary"
               >
                 <option value="is">Íslenska</option>
                 <option value="en">English</option>
@@ -98,7 +98,7 @@ export default function StillingarPage() {
         </div>
 
         {/* Notification Settings */}
-        <div className="bg-card rounded-lg shadow-sm border p-6 mb-6">
+        <div className="themed-card rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">🔔 Tilkynningar</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -141,7 +141,7 @@ export default function StillingarPage() {
         </div>
 
         {/* Privacy Settings */}
-        <div className="bg-card rounded-lg shadow-sm border p-6 mb-6">
+        <div className="themed-card rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">🔒 Persónuvernd</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -184,7 +184,7 @@ export default function StillingarPage() {
         </div>
 
         {/* Accessibility Settings */}
-        <div className="bg-card rounded-lg shadow-sm border p-6 mb-6">
+        <div className="themed-card rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">♿ Aðgengi</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -227,13 +227,13 @@ export default function StillingarPage() {
         </div>
 
         {/* Account Settings */}
-        <div className="bg-card rounded-lg shadow-sm border p-6 mb-6">
+        <div className="themed-card rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">👤 Reikningur</h2>
           <div className="space-y-4">
-            <button className="w-full sm:w-auto px-6 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors">
+            <button className="w-full sm:w-auto px-6 py-2 themed-button rounded-md transition-colors">
               Breyta lykilorði
             </button>
-            <button className="w-full sm:w-auto px-6 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors">
+            <button className="w-full sm:w-auto px-6 py-2 themed-button rounded-md transition-colors">
               Uppfæra netfang
             </button>
             <button className="w-full sm:w-auto px-6 py-2 bg-destructive text-white rounded-md hover:bg-destructive/80 transition-colors">
@@ -246,13 +246,13 @@ export default function StillingarPage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={saveSettings}
-            className="px-8 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
+            className="px-8 py-3 themed-button rounded-md transition-colors font-medium"
           >
             Vista stillingar
           </button>
           <button
             onClick={resetSettings}
-            className="px-8 py-3 bg-muted text-muted-foreground rounded-md hover:bg-muted/80 transition-colors font-medium"
+            className="px-8 py-3 themed-button opacity-70 rounded-md hover:opacity-90 transition-colors font-medium"
           >
             Endurstilla
           </button>

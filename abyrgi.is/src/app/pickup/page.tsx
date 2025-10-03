@@ -98,7 +98,7 @@ function PickupPageContent() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-lg">Hleður korti...</p>
         </div>
       </div>
@@ -109,10 +109,10 @@ function PickupPageContent() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <p className="text-red-500 text-lg">Villa við að hlaða korti</p>
+          <p className="text-red-600 text-lg">Villa við að hlaða korti</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="mt-4 px-4 py-2 themed-button rounded"
           >
             Reyna aftur
           </button>
@@ -124,11 +124,11 @@ function PickupPageContent() {
   return (
     <div className="h-screen flex flex-col">
       <div className="bg-white shadow-sm border-b p-4">
-        <h1 className="text-2xl font-bold text-gray-800">Sækja - Leiðsögn</h1>
+        <h1 className="text-2xl font-bold">Sækja - Leiðsögn</h1>
         {error && (
           <p className="text-amber-600 text-sm mt-1">{error}</p>
         )}
-        <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
+        <div className="mt-2 flex flex-wrap gap-4 text-sm opacity-70">
           <span>� Starfsmenn</span>
           <span>📍 Þín staðsetning</span>
         </div>
@@ -141,12 +141,12 @@ function PickupPageContent() {
         />
       </div>
       
-      <div className="bg-white border-t p-4">
+      <div className="themed-card border-t p-4">
         <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm opacity-70">
             {pickupLocations.length} staðir til að sækja
           </div>
-          <button className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+          <button className="px-6 py-2 themed-button rounded-lg transition-colors">
             Byrja ferð
           </button>
         </div>

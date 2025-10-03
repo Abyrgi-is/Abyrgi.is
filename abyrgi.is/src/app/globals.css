@@ -43,14 +43,225 @@
 }
 
 body {
-  background: #E7ECEF;
-  color: #222;
+  background: #F7F8FA;
+  color: #15121A;
+  min-height: 100vh;
 }
 
 @media (prefers-color-scheme: dark) {
   body {
-    background: #15121aff;
-    color: #f7f7f7;
+    background: #15121A;
+    color: #F7F8FA;
+  }
+}
+
+/* Custom page backgrounds */
+.page-content {
+  background: #F7F8FA;
+  min-height: 100vh;
+  color: #15121A;
+}
+
+@media (prefers-color-scheme: dark) {
+  .page-content {
+    background: #15121A;
+    color: #F7F8FA;
+  }
+}
+
+/* Header and navigation colors */
+.header-nav, nav {
+  background-color: #475569 !important;
+}
+
+/* Footer styling to match */
+footer {
+  background-color: #475569 !important;
+}
+
+/* Ensure good contrast on your color scheme */
+.page-content h1,
+.page-content h2,
+.page-content h3,
+.page-content h4,
+.page-content h5,
+.page-content h6 {
+  color: #15121A;
+}
+
+@media (prefers-color-scheme: dark) {
+  .page-content h1,
+  .page-content h2,
+  .page-content h3,
+  .page-content h4,
+  .page-content h5,
+  .page-content h6 {
+    color: #F7F8FA;
+  }
+}
+
+/* Button and link styling for your color scheme */
+.page-content button,
+.page-content .btn {
+  transition: all 0.2s ease;
+}
+
+.page-content a {
+  color: #6366F1;
+  transition: color 0.2s ease;
+}
+
+.page-content a:hover {
+  color: #4F46E5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .page-content a {
+    color: #818CF8;
+  }
+  
+  .page-content a:hover {
+    color: #A5B4FC;
+  }
+}
+
+/* Themed component classes */
+.themed-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(21, 18, 26, 0.1);
+  color: #15121A;
+  backdrop-filter: blur(8px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .themed-card {
+    background: rgba(31, 28, 36, 0.95);
+    border: 1px solid rgba(247, 248, 250, 0.15);
+    color: #F7F8FA;
+    backdrop-filter: blur(8px);
+  }
+}
+
+.themed-input {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(21, 18, 26, 0.2);
+  color: #15121A;
+  transition: all 0.2s ease;
+}
+
+.themed-input:focus {
+  border-color: #6366F1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .themed-input {
+    background: rgba(31, 28, 36, 0.8);
+    border: 1px solid rgba(247, 248, 250, 0.2);
+    color: #F7F8FA;
+  }
+  
+  .themed-input:focus {
+    border-color: #818CF8;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
+  }
+}
+
+.themed-button {
+  background: #6366F1;
+  color: white;
+  border: none;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.themed-button:hover {
+  background: #4F46E5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.themed-button:active {
+  transform: translateY(0);
+}
+
+.themed-button:disabled {
+  background: #94A3B8;
+  color: #64748B;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.themed-modal-overlay {
+  background: rgba(21, 18, 26, 0.75);
+  backdrop-filter: blur(8px);
+}
+
+.themed-page {
+  background: #F7F8FA;
+  color: #15121A;
+  min-height: 100vh;
+}
+
+@media (prefers-color-scheme: dark) {
+  .themed-page {
+    background: #15121A;
+    color: #F7F8FA;
+  }
+}
+
+/* Additional modern styling elements */
+.accent-gradient {
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  color: white;
+}
+
+.surface-elevated {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(21, 18, 26, 0.15);
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 4px 6px -1px rgba(21, 18, 26, 0.1),
+    0 2px 4px -1px rgba(21, 18, 26, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+.surface-elevated:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px -5px rgba(21, 18, 26, 0.15),
+    0 4px 6px -2px rgba(21, 18, 26, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.9);
+}
+
+@media (prefers-color-scheme: dark) {
+  .surface-elevated {
+    background: rgba(31, 28, 36, 0.95);
+    border: 1px solid rgba(247, 248, 250, 0.15);
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.4),
+      0 2px 4px -1px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(247, 248, 250, 0.1);
+  }
+  
+  .surface-elevated:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 25px -5px rgba(0, 0, 0, 0.5),
+      0 4px 6px -2px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(247, 248, 250, 0.15);
+  }
+}
+
+.text-secondary {
+  color: #64748B;
+}
+
+@media (prefers-color-scheme: dark) {
+  .text-secondary {
+    color: #94A3B8;
   }
 }
 
