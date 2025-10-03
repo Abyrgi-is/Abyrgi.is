@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import AuthGuard from "@/components/auth/AuthGuard";
 
 export default function OrderPage() {
     return (
-        <div className="min-h-screen flex items-center justify-center p-6">
+        <AuthGuard redirectTo="/order">
+            <div className="min-h-screen flex items-center justify-center p-6">
             <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
                 <div className="mb-6">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -53,13 +55,7 @@ export default function OrderPage() {
                 </div>
             </div>
         </div>
-    );
-}
-
-export default function OrderPage() {
-    return (
-        <AuthGuard redirectTo="/order">
-            <OrderPageContent />
         </AuthGuard>
     );
 }
+

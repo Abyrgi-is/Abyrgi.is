@@ -1,5 +1,6 @@
 "use client";
 
+import AuthGuard from "@/components/auth/AuthGuard";
 import OrderButton from "@/components/ui/OrderButton";
 import Map from "@/components/ui/map";
 import { useState, useEffect } from "react";
@@ -28,7 +29,40 @@ interface BookingData {
 }
 
 export default function BorgaPage() {
+    const [bookingData, setBookingData] = useState<BookingData | null>(null);
+
+    useEffect(() => {
+        // Try to get booking data from localStorage or sessionStorage
+        const savedBookingData = localStorage.getItem('bookingData');
+        if (savedBookingData) {
+            setBookingData(JSON.parse(savedBookingData));
+        }
+    }, []);
+
+    // Show loading or no data state if bookingData is not available
+    if (!bookingData) {
+        return (
+            <AuthGuard redirectTo="/borga">
+                <div className="max-w-2xl mx-auto p-6 space-y-6">
+                    <div className="text-center">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            Borga
+                        </h1>
+                        <p className="text-gray-600">
+                            Engin pöntunargögn fundust. Vinsamlegast farðu til baka og veldu bíl.
+                        </p>
+                        <a href="/pickup" className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            Til baka
+                        </a>
+                    </div>
+                </div>
+            </AuthGuard>
+        );
+    }
+
     return (
+         <AuthGuard redirectTo="/borga">
+        
         <div className="max-w-2xl mx-auto p-6 space-y-6">
             <div className="text-center">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -89,13 +123,6 @@ export default function BorgaPage() {
                 </div>
             </div>
         </div>
-    );
-}
-
-export default function BorgaPage() {
-    return (
-        <AuthGuard redirectTo="/borga">
-            <BorgaPageContent />
         </AuthGuard>
     );
 }
