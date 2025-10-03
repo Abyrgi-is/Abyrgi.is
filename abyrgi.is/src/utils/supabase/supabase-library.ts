@@ -20,6 +20,125 @@ const slugifyUsername = (s: string) =>
     .replace(/[^\w.-]+/g, '') // keep a-z0-9 _ . -
     .replace(/^[_\-.]+|[_\-.]+$/g, '') // trim edge symbols
 
+const isCarsTable = (table: string) => table?.toLowerCase() === 'cars'
+
+const CAR_SELECT_COLUMNS = `
+  car_id,
+  user_id,
+  created_at,
+  car_vin,
+  color,
+  manual,
+  plate,
+  car_model_id,
+  car_models (
+    make,
+    model,
+    model_year
+  )
+`
+
+type CarModelNormalized = {
+  make: string
+  model: string
+  modelYear: number
+}
+
+const sanitizeCarText = (value: unknown) => {
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'string') return value.trim()
+  return String(value).trim()
+}
+
+const extractCarModelInput = (values: Record<string, any>) => {
+  const make = values.car_make ?? values.make
+  const model = values.car_model ?? values.model
+  const year = values.car_model_year ?? values.model_year ?? values.year
+  return { make, model, year }
+}
+
+const ensureCarModelRecord = async (
+  input: { make: unknown; model: unknown; year: unknown },
+  schema: string
+): Promise<{ carModelId: string | null; error: any; normalized?: CarModelNormalized }> => {
+  const make = sanitizeCarText(input.make)
+  const model = sanitizeCarText(input.model)
+  const rawYear = input.year
+  const yearValueString = sanitizeCarText(rawYear)
+
+  const yearNumber =
+    typeof rawYear === 'number'
+      ? rawYear
+      : Number(yearValueString)
+
+  if (!make) return { carModelId: null, error: { message: 'Car make is required.' } }
+  if (!model) return { carModelId: null, error: { message: 'Car model is required.' } }
+  if (!yearValueString) return { carModelId: null, error: { message: 'Car model year is required.' } }
+  if (!Number.isFinite(yearNumber)) return { carModelId: null, error: { message: 'Car model year must be a number.' } }
+
+  const normalized: CarModelNormalized = {
+    make,
+    model,
+    modelYear: yearNumber,
+  }
+
+  const fromCarModels = () =>
+    (schema ? supabase.schema(schema) : supabase)
+      .from('car_models')
+
+  const { data: existing, error: fetchError } = await fromCarModels()
+    .select('car_model_id')
+    .eq('make', make)
+    .eq('model', model)
+    .eq('model_year', yearNumber)
+    .maybeSingle()
+
+  if (fetchError) return { carModelId: null, error: fetchError }
+  if (existing?.car_model_id) {
+    return { carModelId: existing.car_model_id as string, error: null, normalized }
+  }
+
+  const { data: inserted, error: insertError } = await fromCarModels()
+    .insert({ make, model, model_year: yearNumber })
+    .select('car_model_id')
+    .single()
+
+  if (insertError) return { carModelId: null, error: insertError }
+
+  return { carModelId: inserted?.car_model_id as string, error: null, normalized }
+}
+
+const normalizeCarRow = (row: Record<string, any>) => {
+  if (!row) return row
+  const { car_models: carModels, ...rest } = row
+  const make = rest.car_make ?? rest.make ?? carModels?.make ?? null
+  const model = rest.car_model ?? rest.model ?? carModels?.model ?? null
+  const modelYear =
+    rest.car_model_year ??
+    rest.model_year ??
+    rest.year ??
+    (typeof carModels?.model_year === 'number' || typeof carModels?.model_year === 'string'
+      ? Number(carModels?.model_year)
+      : carModels?.model_year ?? null)
+
+  return {
+    ...rest,
+    car_make: make,
+    car_model: model,
+    car_model_year: modelYear,
+    make,
+    model,
+    model_year: modelYear,
+  }
+}
+
+const hydrateCarsByIds = async (ids: string[], schema: string | undefined, table: string) => {
+  const tableQuery = schema ? supabase.schema(schema).from(table) : supabase.from(table)
+  const { data, error } = await tableQuery.select(CAR_SELECT_COLUMNS).in('car_id', ids)
+  if (error) return { data: null as any, error }
+  return { data: (data || []).map(normalizeCarRow), error: null }
+}
+
 export const supabaseClient = {
   // Sign in with email and password
   signIn: async (email: string, password: string) => {
@@ -45,12 +164,72 @@ export const supabaseClient = {
 
   // Insert a row into a table
   insertRow: async <T extends Record<string, any>>(table: string, values: T, schema?: string) => {
-    let query = supabase.from(table).insert(values).select('*').single()
-    if (schema) {
-      query = supabase.schema(schema).from(table).insert(values).select('*').single()
+  const isCars = isCarsTable(table)
+  const carSchema = schema ?? 'abyrgi'
+
+    let payload: Record<string, any> = { ...values }
+    let ensuredModel: CarModelNormalized | undefined
+
+    if (isCars) {
+      const {
+        car_make,
+        car_model,
+        car_model_year,
+        make,
+        model,
+        model_year,
+        year,
+        car_model_id,
+        ...rest
+      } = values as Record<string, any>
+
+      if (!car_model_id) {
+        const modelInput = extractCarModelInput(values as Record<string, any>)
+        const { carModelId, error, normalized } = await ensureCarModelRecord(
+          {
+            make: modelInput.make,
+            model: modelInput.model,
+            year: modelInput.year,
+          },
+          carSchema
+        )
+
+        if (error || !carModelId) {
+          return { data: null, error }
+        }
+
+        ensuredModel = normalized
+        payload = { ...rest, car_model_id: carModelId }
+      } else {
+        payload = { ...rest, car_model_id }
+      }
     }
-    const { data, error } = await query
-    return { data, error }
+
+    const tableQuery = () => (schema ? supabase.schema(schema).from(table) : supabase.from(table))
+    const { data, error } = await tableQuery().insert(payload).select('*').single()
+    if (error || !data) return { data, error }
+
+    if (isCars) {
+      const { data: hydrated, error: hydrationError } = await hydrateCarsByIds(
+        [data.car_id as string],
+        carSchema,
+        table
+      )
+
+      if (!hydrationError && hydrated?.length) {
+        return { data: hydrated[0], error: null }
+      }
+
+      const fallback = normalizeCarRow({
+        ...data,
+        car_models: ensuredModel
+          ? { make: ensuredModel.make, model: ensuredModel.model, model_year: ensuredModel.modelYear }
+          : undefined,
+      })
+      return { data: fallback, error: null }
+    }
+
+    return { data, error: null }
   },
 
   // Update rows in a table by filter
@@ -60,12 +239,112 @@ export const supabaseClient = {
     filter: { column: string; value: any },
     schema?: string
   ) => {
-    let query = supabase.from(table).update(values).eq(filter.column, filter.value).select('*')
-    if (schema) {
-      query = supabase.schema(schema).from(table).update(values).eq(filter.column, filter.value).select('*')
+    if (!isCarsTable(table)) {
+      let query = supabase.from(table).update(values).eq(filter.column, filter.value).select('*')
+      if (schema) {
+        query = supabase.schema(schema).from(table).update(values).eq(filter.column, filter.value).select('*')
+      }
+      const { data, error } = await query
+      return { data, error }
     }
-    const { data, error } = await query
-    return { data, error }
+
+    const carSchema = schema ?? 'abyrgi'
+    const {
+      car_make,
+      car_model,
+      car_model_year,
+      make,
+      model,
+      model_year,
+      year,
+      car_model_id,
+      ...rest
+    } = values as Record<string, any>
+
+    const payload: Record<string, any> = { ...rest }
+    let ensuredModel: CarModelNormalized | undefined
+
+    const hasAnyModelField =
+      car_model_id !== undefined ||
+      car_make !== undefined ||
+      car_model !== undefined ||
+      car_model_year !== undefined ||
+      make !== undefined ||
+      model !== undefined ||
+      model_year !== undefined ||
+      year !== undefined
+
+    if (hasAnyModelField) {
+      if (car_model_id) {
+        payload.car_model_id = car_model_id
+      } else {
+        const modelInput = extractCarModelInput(values as Record<string, any>)
+        const { carModelId, error, normalized } = await ensureCarModelRecord(
+          {
+            make: modelInput.make,
+            model: modelInput.model,
+            year: modelInput.year,
+          },
+          carSchema
+        )
+
+        if (error || !carModelId) {
+          return { data: null, error }
+        }
+
+        ensuredModel = normalized
+        payload.car_model_id = carModelId
+      }
+    }
+
+    const tableQuery = () => (schema ? supabase.schema(schema).from(table) : supabase.from(table))
+    const { data: updated, error } = await tableQuery()
+      .update(payload)
+      .eq(filter.column, filter.value)
+      .select('*')
+
+    if (error || !updated) return { data: updated, error }
+
+    const rowsArray = Array.isArray(updated) ? updated : [updated]
+    if (rowsArray.length === 0) return { data: updated, error: null }
+
+    const ids = rowsArray
+      .map((row) => row?.car_id)
+      .filter((id): id is string => typeof id === 'string' && !!id)
+
+    if (!ids.length) {
+      const normalizedRows = rowsArray.map((row) =>
+        normalizeCarRow({
+          ...row,
+          car_models: ensuredModel
+            ? { make: ensuredModel.make, model: ensuredModel.model, model_year: ensuredModel.modelYear }
+            : undefined,
+        })
+      )
+      return { data: Array.isArray(updated) ? normalizedRows : normalizedRows[0], error: null }
+    }
+
+    const { data: hydrated, error: hydrationError } = await hydrateCarsByIds(ids, carSchema, table)
+    if (!hydrationError && hydrated) {
+      const castHydrated = hydrated as Array<Record<string, any>>
+      const mapped = ids
+        .map((id) => castHydrated.find((row) => row.car_id === id))
+        .filter(Boolean)
+      return {
+        data: Array.isArray(updated) ? mapped : mapped[0] ?? null,
+        error: null,
+      }
+    }
+
+    const fallback = rowsArray.map((row) =>
+      normalizeCarRow({
+        ...row,
+        car_models: ensuredModel
+          ? { make: ensuredModel.make, model: ensuredModel.model, model_year: ensuredModel.modelYear }
+          : undefined,
+      })
+    )
+    return { data: Array.isArray(updated) ? fallback : fallback[0], error: null }
   },
 
   // Delete rows in a table by filter
@@ -107,12 +386,12 @@ export const supabaseClient = {
   ) => {
     const table = options?.table ?? 'Cars'
     const userIdColumn = options?.userIdColumn ?? 'user_id'
-    let query = supabase.from(table).select('*').eq(userIdColumn, userId)
-    if (schema) {
-      query = supabase.schema(schema).from(table).select('*').eq(userIdColumn, userId)
-    }
-    const { data, error } = await query
-    return { data, error }
+    const tableQuery = schema ? supabase.schema(schema).from(table) : supabase.from(table)
+    const selectColumns = isCarsTable(table) ? CAR_SELECT_COLUMNS : '*'
+    const { data, error } = await tableQuery.select(selectColumns).eq(userIdColumn, userId)
+    if (error) return { data: null, error }
+    if (!isCarsTable(table)) return { data, error: null }
+    return { data: (data || []).map((row: Record<string, any>) => normalizeCarRow(row)), error: null }
   },
 
   // Create a new user
