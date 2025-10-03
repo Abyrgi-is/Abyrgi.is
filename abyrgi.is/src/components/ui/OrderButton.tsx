@@ -23,15 +23,16 @@ export default function OrderButton() {
                 return;
             }
 
-            // Get booking data from localStorage
-            const bookingDataStr = localStorage.getItem('bookingData');
+            // Get order data from localStorage
+            const bookingDataStr = localStorage.getItem('bookingData'); // Keep 'bookingData' key for compatibility
+            
             if (!bookingDataStr) {
-                setError("No booking data found. Please start over.");
+                setError("No order data found. Please start over.");
                 setIsSubmitting(false);
                 return;
             }
 
-            const bookingData = JSON.parse(bookingDataStr);
+            const bookingData = JSON.parse(bookingDataStr); // Keep variable name for compatibility
             
             // Extract coordinates from mapLocation or coordinates
             let latitude: number | null = null;
@@ -45,33 +46,45 @@ export default function OrderButton() {
                 longitude = bookingData.coordinates.longitude;
             }
 
-            // Validate required data
-            if (!bookingData.selectedCar?.id) {
+            // Validate required data - check for both id and car_id fields
+            const carId = bookingData.selectedCar?.id || bookingData.selectedCar?.car_id;
+            
+            if (!carId) {
                 setError("No car selected. Please select a car.");
                 setIsSubmitting(false);
                 return;
             }
 
-            // Submit booking to database
-            const { data, error: bookingError } = await supabaseClient.placeBooking({
+            // Submit order to database (using existing orders table)
+            // Use car_id for both pickup and dropoff location IDs since orders table expects UUIDs
+            const { data, error: orderError } = await supabaseClient.placeOrder({
                 user_id: user.id,
-                car_id: bookingData.selectedCar.id,
-                pickup_location: bookingData.location || `${latitude}, ${longitude}`,
-                pickup_latitude: latitude,
-                pickup_longitude: longitude,
+                pickup_location_id: carId, // Use car_id as pickup location ID
+                dropoff_location_id: carId, // Use car_id as dropoff location ID (required field)
                 status: 'pending',
+                notes: `Location: ${bookingData.location || `${latitude}, ${longitude}`}, Car: ${carId}, Coordinates: ${latitude},${longitude}`,
             });
 
-            if (bookingError) {
-                console.error("Booking error:", bookingError);
-                setError(`Failed to place booking: ${bookingError.message}`);
+            if (orderError) {
+                console.error("Order error:", orderError);
+                console.error("Full order error details:", JSON.stringify(orderError, null, 2));
+                
+                // Check if it's a 404 error (table not found)
+                const errorMessage = orderError.message || 'Unknown database error';
+                const is404Error = errorMessage.includes('404') || errorMessage.includes('Not Found') || !orderError.message;
+                
+                if (is404Error) {
+                    setError(`Database table 'orders' not found. Please create the orders table in your Supabase database.`);
+                } else {
+                    setError(`Failed to place order: ${errorMessage}`);
+                }
                 setIsSubmitting(false);
                 return;
             }
 
-            console.log("Booking placed successfully:", data);
+            console.log("Order placed successfully:", data);
             
-            // Clear booking data from localStorage
+            // Clear order data from localStorage
             localStorage.removeItem('bookingData');
             
             // Navigate to order confirmation page

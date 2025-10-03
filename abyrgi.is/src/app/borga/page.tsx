@@ -1,21 +1,137 @@
+"use client";
+
 import OrderButton from "@/components/ui/OrderButton";
 import Map from "@/components/ui/map";
+import { useState, useEffect } from "react";
+
+interface Car {
+  id: string;
+  make: string;
+  model: string;
+  color: string;
+  licensePlate: string;
+  year: number;
+  // Database field names for compatibility
+  car_id?: string;
+  car_make?: string;
+  car_model?: string;
+  car_model_year?: number;
+  plate?: string;
+}
+
+interface BookingData {
+  location: string;
+  coordinates: any;
+  mapLocation: [number, number] | null;
+  selectedCar: Car;
+  timestamp: string;
+}
 
 export default function BorgaPage() {
+    const [bookingData, setBookingData] = useState<BookingData | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        try {
+            const storedData = localStorage.getItem('bookingData');
+            if (storedData) {
+                const data = JSON.parse(storedData) as BookingData;
+                setBookingData(data);
+            } else {
+                setError("No booking data found. Please go back and select a car.");
+            }
+        } catch (err) {
+            setError("Error reading booking data.");
+            console.error("Error parsing booking data:", err);
+        }
+    }, []);
+
+    if (error) {
+        return (
+            <div className="max-w-2xl mx-auto p-6">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <p className="text-red-600 font-semibold">Error</p>
+                    <p className="text-red-600">{error}</p>
+                </div>
+                <button 
+                    onClick={() => window.history.back()}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                    Go Back
+                </button>
+            </div>
+        );
+    }
+
+    if (!bookingData) {
+        return (
+            <div className="max-w-2xl mx-auto p-6 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-2">Loading booking data...</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="p-6 bg-gray-100 rounded-lg shadow-md">
-            <div className="text-lg text-gray-700 mb-4">
-                <p>Verð start gjald: <span className="font-semibold">1000kr</span></p>
-                <p>Km verð: <span className="font-semibold">250kr</span></p>
-                <p className="text-sm text-gray-500">
-                    (Þetta er alvöru borga, þetta virkar ekki í bara að ýtta á takkann)
+        <div className="max-w-2xl mx-auto p-6 space-y-6">
+            <div className="text-center">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    Borga
+                </h1>
+                <p className="text-gray-600">
+                    Farðu yfir pöntunina þína og borgaðu
                 </p>
             </div>
 
-            <div className="flex justify-center">
-                <OrderButton />
+            {/* Selected Car Information */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-semibold mb-4">Valinn bíll</h2>
+                <div className="border-2 border-blue-600 bg-blue-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h3 className="font-semibold text-lg">
+                                {bookingData.selectedCar.make || bookingData.selectedCar.car_make} {bookingData.selectedCar.model || bookingData.selectedCar.car_model}
+                            </h3>
+                            <p className="text-gray-600">
+                                {bookingData.selectedCar.color} • {bookingData.selectedCar.year || bookingData.selectedCar.car_model_year}
+                            </p>
+                        </div>
+                        <div className="text-right">
+                            <p className="font-mono text-lg">{bookingData.selectedCar.licensePlate || bookingData.selectedCar.plate}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
+
+            {/* Location Information */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-semibold mb-4">Staðsetning</h2>
+                <p className="text-gray-700">{bookingData.location}</p>
+                {bookingData.mapLocation && (
+                    <p className="text-sm text-gray-500 mt-1">
+                        Coordinates: {bookingData.mapLocation[0].toFixed(6)}, {bookingData.mapLocation[1].toFixed(6)}
+                    </p>
+                )}
+            </div>
+
+            {/* Pricing */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-semibold mb-4">Verðlag</h2>
+                <div className="text-lg text-gray-700 space-y-2">
+                    <p>Verð start gjald: <span className="font-semibold">1000kr</span></p>
+                    <p>Km verð: <span className="font-semibold">250kr</span></p>
+                    <p className="text-sm text-gray-500">
+                        (Þetta er alvöru borga, þetta virkar ekki í bara að ýtta á takkann)
+                    </p>
+                </div>
+            </div>
+
+            {/* Payment Button */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="flex justify-center">
+                    <OrderButton />
+                </div>
+            </div>
         </div>
     );
 }

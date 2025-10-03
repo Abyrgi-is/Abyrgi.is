@@ -44,7 +44,19 @@ export default function CarSelector({ onCarSelect }: CarSelectorProps) {
       if (error) {
         setError(error.message);
       } else {
-        setCars((data as Car[]) ?? []);
+        // Normalize the data to match our Car interface
+        const normalizedCars = (data as any[])?.map((car: any) => ({
+          id: car.car_id || car.id, // Use car_id from DB or fallback to id
+          make: car.car_make || car.make,
+          model: car.car_model || car.model,
+          color: car.color,
+          licensePlate: car.plate || car.licensePlate,
+          year: car.car_model_year || car.year,
+          // Keep original data for compatibility
+          ...car
+        })) ?? [];
+        
+        setCars(normalizedCars);
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Unknown error while fetching cars");
