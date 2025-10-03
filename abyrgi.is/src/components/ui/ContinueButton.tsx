@@ -24,7 +24,7 @@ export default function ContinueButton({ disabled = false, onClick }: ContinueBu
       disabled={disabled}
       className={`w-full py-3 px-6 rounded-lg font-semibold text-lg transition-colors ${
         disabled
-          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          ? 'themed-button opacity-50 cursor-not-allowed'
           : 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800'
       }`}
     >

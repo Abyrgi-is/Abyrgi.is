@@ -23,15 +23,15 @@ const LocationMap: React.FC<LocationMapProps> = ({ onLocationSelect, selectedLoc
     return (
         <div className="space-y-4">
             <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="text-lg font-medium mb-2">
                     Veldu staðsetningu á kortinu
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm opacity-70 mb-4">
                     Smelltu á kortið til að velja staðsetningu eða dragðu merkið til að breyta
                 </p>
             </div>
             
-            <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+            <div className="border border-primary/20 rounded-lg overflow-hidden shadow-sm">
                 <Map
                     onMapClick={handleMapClick}
                     clickableMarker={selectedLocation}
@@ -42,8 +42,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ onLocationSelect, selectedLoc
             </div>
             
             {selectedLocation && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-sm text-blue-800">
+                <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
+                    <p className="text-sm font-medium">
                         <span className="font-medium">Valin staðsetning:</span> {selectedLocation[0].toFixed(6)}, {selectedLocation[1].toFixed(6)}
                     </p>
                 </div>

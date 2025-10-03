@@ -73,7 +73,7 @@ export default function LocationInput({ onLocationChange }: LocationInputProps) 
         <button
           onClick={getCurrentLocation}
           disabled={isLoading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
+          className="px-4 py-2 themed-button rounded-md whitespace-nowrap"
         >
           {isLoading ? 'Sæki...' : 'GPS'}
         </button>

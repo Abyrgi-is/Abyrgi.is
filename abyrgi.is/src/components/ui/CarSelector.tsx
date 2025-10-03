@@ -62,8 +62,8 @@ export default function CarSelector({ onCarSelect }: CarSelectorProps) {
             onClick={() => handleCarSelect(car)}
             className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
               selectedCar?.id === car.id
-                ? 'border-blue-600 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-primary bg-primary/10'
+                : 'border-primary/20 hover:border-primary/30'
             }`}
           >
             <div className="flex justify-between items-start">
@@ -71,12 +71,12 @@ export default function CarSelector({ onCarSelect }: CarSelectorProps) {
                 <h3 className="font-semibold text-lg">
                   {car.make} {car.model}
                 </h3>
-                <p className="text-gray-600">{car.color} • {car.year}</p>
+                <p className="opacity-70">{car.color} • {car.year}</p>
               </div>
               <div className="text-right">
                 <p className="font-mono text-lg">{car.licensePlate}</p>
                 {selectedCar?.id === car.id && (
-                  <span className="inline-block w-4 h-4 bg-blue-600 rounded-full mt-1"></span>
+                  <span className="inline-block w-4 h-4 bg-primary rounded-full mt-1"></span>
                 )}
               </div>
             </div>
@@ -84,7 +84,7 @@ export default function CarSelector({ onCarSelect }: CarSelectorProps) {
         ))}
       </div>
       {userCars.length === 0 && (
-        <p className="text-gray-600 text-center py-8">
+        <p className="opacity-70 text-center py-8">
           Þú hefur ekki skráða bíla. Farðu í stillingar til að bæta við bíl.
         </p>
       )}
