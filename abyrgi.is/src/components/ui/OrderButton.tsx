@@ -55,14 +55,49 @@ export default function OrderButton() {
                 return;
             }
 
-            // Submit order to database (using existing orders table)
-            // Use car_id for both pickup and dropoff location IDs since orders table expects UUIDs
+            // First create a location record for pickup
+            const locationName = bookingData.location || `Pickup Location`;
+            const locationAddress = bookingData.location || `${latitude}, ${longitude}`;
+            
+            const { data: pickupLocation, error: locationError } = await supabaseClient.createLocation({
+                name: locationName,
+                address: locationAddress,
+                latitude: latitude || 0,
+                longitude: longitude || 0,
+                user_id: user.id,
+            });
+
+            if (locationError) {
+                console.error("Location creation error:", locationError);
+                setError(`Failed to create pickup location: ${locationError.message}`);
+                setIsSubmitting(false);
+                return;
+            }
+
+            // For dropoff, we'll create a simple "Car Location" or reuse pickup location
+            const { data: dropoffLocation, error: dropoffLocationError } = await supabaseClient.createLocation({
+                name: "Dropoff Location",
+                address: locationAddress, // Same as pickup for now
+                latitude: latitude || 0,
+                longitude: longitude || 0,
+                user_id: user.id,
+            });
+
+            if (dropoffLocationError) {
+                console.error("Dropoff location creation error:", dropoffLocationError);
+                setError(`Failed to create dropoff location: ${dropoffLocationError.message}`);
+                setIsSubmitting(false);
+                return;
+            }
+
+            // Now submit order to database using the location UUIDs
             const { data, error: orderError } = await supabaseClient.placeOrder({
                 user_id: user.id,
-                pickup_location_id: carId, // Use car_id as pickup location ID
-                dropoff_location_id: carId, // Use car_id as dropoff location ID (required field)
+                pickup_location_id: pickupLocation.location_id,
+                dropoff_location_id: dropoffLocation.location_id,
+                car_id: carId,
                 status: 'pending',
-                notes: `Location: ${bookingData.location || `${latitude}, ${longitude}`}, Car: ${carId}, Coordinates: ${latitude},${longitude}`,
+                notes: `Pickup: ${locationName}, Car: ${carId}`,
             });
 
             if (orderError) {
