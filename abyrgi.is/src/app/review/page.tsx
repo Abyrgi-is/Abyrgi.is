@@ -7,14 +7,14 @@ import { supabaseClient } from '@/utils/supabase/supabase-library';
 interface Review {
     id: string;
     user_id: string;
-    order_id?: string;
+    order_id: string;
     rating: number;
-    comment?: string;
+    created_at: string;
+    // Display fields (joined from orders/cars)
     pickup_location?: string;
     dropoff_location?: string;
     driver_name?: string;
     car_info?: string;
-    created_at: string;
 }
 
 interface OrderData {
@@ -27,7 +27,7 @@ interface OrderData {
     status: string;
     notes?: string;
     created_at: string;
-    // Joined data
+    // Joined data for display
     pickup_location?: string;
     dropoff_location?: string;
     driver_name?: string;
@@ -41,25 +41,35 @@ function StarRating({ rating, onRatingChange, readonly = false }: {
     onRatingChange?: (rating: number) => void;
     readonly?: boolean;
 }) {
+    const [hoveredRating, setHoveredRating] = useState(0);
     const stars = [1, 2, 3, 4, 5];
     
     return (
         <div className="flex space-x-1">
-            {stars.map((star) => (
-                <button
-                    key={star}
-                    type="button"
-                    className={`text-2xl transition-colors ${
-                        star <= rating 
-                            ? 'text-yellow-400' 
-                            : 'text-gray-300 dark:text-gray-600'
-                    } ${!readonly && onRatingChange ? 'hover:text-yellow-300 cursor-pointer' : 'cursor-default'}`}
-                    onClick={() => !readonly && onRatingChange && onRatingChange(star)}
-                    disabled={readonly}
-                >
-                    ★
-                </button>
-            ))}
+            {stars.map((star) => {
+                const isActive = star <= (hoveredRating || rating);
+                const isHovered = hoveredRating > 0 && star <= hoveredRating;
+                
+                return (
+                    <button
+                        key={star}
+                        type="button"
+                        className={`text-2xl transition-colors ${
+                            isActive
+                                ? isHovered 
+                                    ? 'text-yellow-300 dark:text-yellow-200' 
+                                    : 'text-yellow-400'
+                                : 'text-gray-300 dark:text-gray-600'
+                        } ${!readonly && onRatingChange ? 'cursor-pointer' : 'cursor-default'}`}
+                        onClick={() => !readonly && onRatingChange && onRatingChange(star)}
+                        onMouseEnter={() => !readonly && onRatingChange && setHoveredRating(star)}
+                        onMouseLeave={() => !readonly && onRatingChange && setHoveredRating(0)}
+                        disabled={readonly}
+                    >
+                        ★
+                    </button>
+                );
+            })}
         </div>
     );
 }
@@ -83,7 +93,7 @@ function ReviewCard({ review }: { review: Review }) {
             
             {/* Trip Details */}
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
                     <div>
                         <span className="font-medium text-gray-700 dark:text-gray-300">Frá:</span>
                         <p className="text-gray-600 dark:text-gray-400">{review.pickup_location || 'Ekki skráð'}</p>
@@ -107,14 +117,7 @@ function ReviewCard({ review }: { review: Review }) {
                 </div>
             </div>
             
-            {/* Comment */}
-            {review.comment && (
-                <div>
-                    <p className="text-gray-700 dark:text-gray-200 leading-relaxed italic">
-                        "{review.comment}"
-                    </p>
-                </div>
-            )}
+            {/* Note: Comments are not stored in the reviews table */}
         </div>
     );
 }
@@ -127,7 +130,6 @@ function ReviewPageContent() {
     const [selectedTrip, setSelectedTrip] = useState<OrderData | null>(null);
     const [formData, setFormData] = useState({
         rating: 0,
-        comment: '',
     });
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState('');
@@ -140,27 +142,80 @@ function ReviewPageContent() {
     const fetchReviews = async () => {
         try {
             setLoading(true);
-            // Try to fetch from reviews table - you may need to create this table in Supabase
-            const { data, error } = await supabaseClient.fetchData('reviews', 'abyrgi');
+            const { user, error: userError } = await supabaseClient.getCurrentUser();
+            if (userError || !user) return;
+
+            // Fetch reviews for this user
+            const { data: reviewsData, error } = await supabaseClient.fetchData('reviews', 'abyrgi');
             
             if (error) {
-                // If table doesn't exist (404), just set empty reviews
                 if (error.message?.includes('404') || error.code === 'PGRST116') {
-                    console.log('Reviews table not found - starting with empty reviews');
+                    // Reviews table not found - starting with empty reviews
                     setReviews([]);
                 } else {
-                    console.error('Error fetching reviews:', error);
+                    // Handle review fetch error silently
                     setReviews([]);
                 }
             } else {
-                // Sort by creation date, newest first
-                const sortedReviews = (data || []).sort((a: any, b: any) => 
-                    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-                );
-                setReviews(sortedReviews);
+                // Get orders data to join with reviews for display information (including archived)
+                const { data: ordersData } = await supabaseClient.fetchData('orders', 'abyrgi');
+                const { data: carsData } = await supabaseClient.fetchData('cars', 'abyrgi');
+                const { data: carModelsData } = await supabaseClient.fetchData('car_models', 'abyrgi');
+                
+                // Filter reviews by current user and enrich with order data
+                const userReviews = (reviewsData || [])
+                    .filter((review: any) => review.user_id === user.id)
+                    .map((review: any) => {
+                        // Find the corresponding order
+                        const order = ordersData?.find((o: any) => o.order_id === review.order_id);
+                        
+                        if (!order) {
+                            return {
+                                ...review,
+                                pickup_location: 'Unknown Location',
+                                dropoff_location: 'Unknown Location',
+                                driver_name: 'Unknown Driver',
+                                car_info: 'Unknown Car'
+                            };
+                        }
+
+                        // Parse car info from order notes
+                        let actualCarId = order.car_id;
+                        let pickupCoords = null;
+                        
+                        if (order.notes) {
+                            const carMatch = order.notes.match(/Car:\s*([a-f0-9-]+)/i);
+                            const pickupMatch = order.notes.match(/Pickup:\s*([\d.-]+),\s*([\d.-]+)/i);
+                            
+                            if (carMatch) actualCarId = carMatch[1];
+                            if (pickupMatch) {
+                                pickupCoords = {
+                                    lat: parseFloat(pickupMatch[1]),
+                                    lng: parseFloat(pickupMatch[2])
+                                };
+                            }
+                        }
+
+                        // Find car and car model (using user's cars from getCarsByUser)
+                        const car = carsData?.find((c: any) => c.car_id === actualCarId);
+                        const carModel = car ? carModelsData?.find((cm: any) => cm.car_model_id === car.car_model_id) : null;
+
+                        return {
+                            ...review,
+                            pickup_location: pickupCoords ? `${pickupCoords.lat.toFixed(4)}, ${pickupCoords.lng.toFixed(4)}` : 'Unknown Location',
+                            dropoff_location: 'End Location', // You can enhance this with dropoff parsing if needed
+                            driver_name: order.staff_id ? `Driver ${order.staff_id.slice(0, 8)}` : 'No Driver Assigned',
+                            car_info: carModel ? `${carModel.make} ${carModel.model} (${car?.plate || 'Unknown Plate'})` : 'Unknown Car'
+                        };
+                    })
+                    .sort((a: any, b: any) => 
+                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                    );
+                    
+                setReviews(userReviews);
             }
         } catch (error) {
-            console.error('Error fetching reviews:', error);
+            // Handle review fetch error
             setReviews([]);
         } finally {
             setLoading(false);
@@ -170,45 +225,156 @@ function ReviewPageContent() {
     const fetchCompletedTrips = async () => {
         try {
             const { user, error: userError } = await supabaseClient.getCurrentUser();
-            if (userError || !user) return;
+            if (userError || !user) {
+                console.log('No user found:', userError);
+                return;
+            }
+
+
 
             // Fetch completed orders for the current user
             const { data: orders, error } = await supabaseClient.fetchData('orders', 'abyrgi');
             
             if (error) {
-                console.error('Error fetching orders:', error);
+                // Handle orders fetch error
                 return;
             }
 
-            // Filter for completed orders by this user that haven't been reviewed yet
-            const userCompletedOrders = (orders || []).filter((order: any) => 
+
+
+            // Auto-archive orders that are 'done' for more than 24 hours without review
+            const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            const ordersToArchive = (orders || []).filter((order: any) => 
                 order.user_id === user.id && 
-                order.status === 'completed'
+                order.status === 'done' &&
+                new Date(order.created_at) < oneDayAgo
             );
 
-            // For now, we'll use simplified data - you may want to add joins for location names, staff names, and car details
-            const formattedOrders: OrderData[] = userCompletedOrders.map((order: any) => ({
-                order_id: order.order_id,
-                user_id: order.user_id,
-                staff_id: order.staff_id,
-                car_id: order.car_id,
-                pickup_location_id: order.pickup_location_id,
-                dropoff_location_id: order.dropoff_location_id,
-                status: order.status,
-                notes: order.notes,
-                created_at: order.created_at,
-                // Placeholder data - replace with actual joins
-                pickup_location: 'Pickup Location',
-                dropoff_location: 'Dropoff Location',
-                driver_name: 'Driver Name',
-                car_make: 'Car Make',
-                car_model: 'Car Model',
-                license_plate: 'XXX-XXX'
-            }));
+            // Archive old completed orders
+            for (const order of ordersToArchive) {
+                const { error: archiveError } = await supabaseClient.updateRows('orders', { status: 'archived' }, { column: 'order_id', value: order.order_id }, 'abyrgi');
+                if (archiveError) {
+                    // Silently handle archive errors
+                }
+            }
+
+            // Filter for DONE orders by this user (excluding archived ones)
+            const userCompletedOrders = (orders || []).filter((order: any) => 
+                order.user_id === user.id && 
+                order.status === 'done'
+            );
+
+
+
+            // Get existing reviews to filter out already reviewed orders
+            const { data: existingReviews } = await supabaseClient.fetchData('reviews', 'abyrgi');
+            const reviewedOrderIds = new Set(
+                (existingReviews || [])
+                    .filter((review: any) => review.user_id === user.id)
+                    .map((review: any) => review.order_id)
+            );
+
+            // Filter out orders that have already been reviewed
+            const unreviewed = userCompletedOrders.filter((order: any) => 
+                !reviewedOrderIds.has(order.order_id)
+            );
+
+            // Get all cars (needed to look up any car used in orders, not just user's cars)
+            const { data: cars, error: carsError } = await supabaseClient.fetchData('cars', 'abyrgi');
+            if (carsError) {
+                // Handle car fetch error silently
+            }
+
+            // Get car models for make/model information
+            const { data: carModels, error: carModelsError } = await supabaseClient.fetchData('car_models', 'abyrgi');
+            if (carModelsError) {
+                // Handle car models fetch error silently
+            }
+
+            // Get location details
+            const { data: locations, error: locationsError } = await supabaseClient.fetchData('locations', 'abyrgi');
+            if (locationsError) {
+                // Handle location fetch error silently
+            }
+
+            // Note: users table is part of Supabase auth system, not accessible via regular queries
+            // We'll get user info through user_roles and roles tables, or use placeholder data
+
+            // We'll get role information as needed for individual staff members
+
+            // Map orders with actual car, location, and staff data
+            const formattedOrders: OrderData[] = unreviewed.map((order: any) => {
+
+                
+                // Parse notes to extract car ID and pickup coordinates
+                let actualCarId = order.car_id;
+                let pickupCoords = null;
+                
+                if (order.notes) {
+                    // Example: "Pickup: 64.149914, -21.915238, Car: fc71f9dd-e882-4a9b-93bd-429885080164"
+                    const carMatch = order.notes.match(/Car:\s*([a-f0-9-]+)/i);
+                    const pickupMatch = order.notes.match(/Pickup:\s*([\d.-]+),\s*([\d.-]+)/i);
+                    
+                    if (carMatch) {
+                        actualCarId = carMatch[1];
+                    }
+                    
+                    if (pickupMatch) {
+                        pickupCoords = {
+                            lat: parseFloat(pickupMatch[1]),
+                            lng: parseFloat(pickupMatch[2])
+                        };
+
+                    }
+                }
+                
+                // Find the car using the actual car ID from notes
+                const car = cars?.find((c: any) => c.car_id === actualCarId || c.id === actualCarId);
+                
+                // Find the car model using car_model_id from the car
+                let carModel = null;
+                if (car && car.car_model_id) {
+                    carModel = carModels?.find((cm: any) => cm.car_model_id === car.car_model_id || cm.id === car.car_model_id);
+
+                }
+                
+                // Find pickup and dropoff locations (fallback to table if available)
+                const pickupLocation = locations?.find((l: any) => l.id === order.pickup_location_id);
+                const dropoffLocation = locations?.find((l: any) => l.id === order.dropoff_location_id);
+                
+                // Determine driver name - we'll get role info when needed
+                let driverName = 'Ekki úthlutað';
+                
+                if (order.staff_id) {
+                    // For now, use generic staff identifier
+                    // In the future, we could fetch individual staff roles using getUserRole
+                    driverName = `Starfsmaður ${order.staff_id.slice(0, 8)}`;
+                }
+
+                return {
+                    order_id: order.order_id,
+                    user_id: order.user_id,
+                    staff_id: order.staff_id,
+                    car_id: order.car_id,
+                    pickup_location_id: order.pickup_location_id,
+                    dropoff_location_id: order.dropoff_location_id,
+                    status: order.status,
+                    notes: order.notes,
+                    created_at: order.created_at,
+                    // Real data from joins
+                    pickup_location: pickupLocation?.name || pickupLocation?.address || 
+                                   (pickupCoords ? `${pickupCoords.lat.toFixed(4)}, ${pickupCoords.lng.toFixed(4)}` : `Location ${order.pickup_location_id.slice(0, 8)}`),
+                    dropoff_location: dropoffLocation?.name || dropoffLocation?.address || `Location ${order.dropoff_location_id.slice(0, 8)}`,
+                    driver_name: driverName,
+                    car_make: carModel?.make || 'Unknown Make',
+                    car_model: carModel?.model || 'Unknown Model',
+                    license_plate: car?.plate || 'Unknown Plate'
+                };
+            });
 
             setCompletedTrips(formattedOrders);
         } catch (error) {
-            console.error('Error fetching trips:', error);
+            // Handle trips fetch error
         }
     };
 
@@ -238,13 +404,9 @@ function ReviewPageContent() {
             const reviewData = {
                 user_id: user.id,
                 order_id: selectedTrip.order_id,
-                rating: formData.rating,
-                comment: formData.comment.trim() || null,
-                pickup_location: selectedTrip.pickup_location,
-                dropoff_location: selectedTrip.dropoff_location,
-                driver_name: selectedTrip.driver_name,
-                car_info: `${selectedTrip.car_make} ${selectedTrip.car_model} (${selectedTrip.license_plate})`,
-                created_at: new Date().toISOString()
+                rating: formData.rating
+                // Note: created_at will be automatically set by the database
+                // comment, pickup_location, dropoff_location, driver_name, car_info are not part of reviews table
             };
 
             const { error } = await supabaseClient.insertRow('reviews', reviewData, 'abyrgi');
@@ -252,18 +414,25 @@ function ReviewPageContent() {
             if (error) {
                 setMessage('Villa kom upp við að vista umsögnina: ' + error.message);
             } else {
+                // After successful review submission, archive the order
+                try {
+                const { error: archiveError } = await supabaseClient.updateRows('orders', { status: 'archived' }, { column: 'order_id', value: selectedTrip.order_id }, 'abyrgi');
+
+                } catch (archiveError) {
+                    console.warn('Failed to archive order after review:', archiveError);
+                    // Don't fail the review process if archiving fails
+                }
+
                 setMessage('Takk fyrir umsögnina!');
-                setFormData({
-                    rating: 0,
-                    comment: ''
-                });
+                setFormData({ rating: 0 });
                 setSelectedTrip(null);
                 setShowForm(false);
-                fetchReviews(); // Refresh reviews
+                fetchReviews();
+                fetchCompletedTrips(); // Refresh to remove reviewed trip
             }
         } catch (error) {
             setMessage('Villa kom upp við að vista umsögnina');
-            console.error('Error submitting review:', error);
+            // Handle review submission error
         } finally {
             setSubmitting(false);
         }
@@ -299,7 +468,7 @@ function ReviewPageContent() {
                             {completedTrips[0].driver_name} • {completedTrips[0].car_make} {completedTrips[0].car_model}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-500">
-                            Pöntun: {completedTrips[0].order_id.slice(0, 8)}...
+                            Pöntun: {completedTrips[0].order_id.slice(0, 8)}... • {new Date(completedTrips[0].created_at).toLocaleDateString('is-IS')}
                         </p>
                     </div>
                     <button
@@ -307,7 +476,7 @@ function ReviewPageContent() {
                             setSelectedTrip(completedTrips[0]);
                             setShowForm(true);
                         }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
                     >
                         Gefa umsögn um ferðina
                     </button>
@@ -323,19 +492,46 @@ function ReviewPageContent() {
                                 {reviews.length}
                             </div>
                             <div className="text-sm text-gray-600 dark:text-gray-400">
-                                Umsagnir um ferðir
+                                Þínar umsagnir
                             </div>
                         </div>
                         <div>
-                            <div className="text-3xl font-bold text-yellow-500">
+                            <div className="text-3xl font-bold text-yellow-500 dark:text-yellow-400">
                                 {averageRating.toFixed(1)}
                             </div>
                             <div className="text-sm text-gray-600 dark:text-gray-400">
-                                Meðaleinkunn
+                                Þín meðaleinkunn
                             </div>
                             <StarRating rating={Math.round(averageRating)} readonly />
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* Reviews List */}
+            {reviews.length > 0 && (
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                        Þínar umsagnir
+                    </h2>
+                    <div className="space-y-6">
+                        {reviews.map((review) => (
+                            <ReviewCard key={review.id} review={review} />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Empty State */}
+            {reviews.length === 0 && completedTrips.length === 0 && !loading && (
+                <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🚗</div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Engar ferðir til umsagnar
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                        Þegar þú hefur lokið ferð muntu geta gefið henni umsögn hér.
+                    </p>
                 </div>
             )}
 
@@ -345,7 +541,7 @@ function ReviewPageContent() {
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-md"></div>
                     <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl max-w-lg w-full mx-4 relative z-10 border border-gray-200 dark:border-gray-700">
                         <button
-                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl"
                             onClick={() => setShowForm(false)}
                         >
                             ×
@@ -367,7 +563,7 @@ function ReviewPageContent() {
                                 🚗 {selectedTrip.driver_name} • {selectedTrip.car_make} {selectedTrip.car_model} ({selectedTrip.license_plate})
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-500">
-                                Pöntun: {selectedTrip.order_id.slice(0, 8)}...
+                                Pöntun: {selectedTrip.order_id.slice(0, 8)}... • {new Date(selectedTrip.created_at).toLocaleDateString('is-IS')}
                             </p>
                         </div>
                         
@@ -382,18 +578,7 @@ function ReviewPageContent() {
                                 />
                             </div>
                             
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Athugasemdir (valfrjálst)
-                                </label>
-                                <textarea
-                                    value={formData.comment}
-                                    onChange={(e) => setFormData({...formData, comment: e.target.value})}
-                                    rows={4}
-                                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                    placeholder="Viltu segja okkur eitthvað meira um ferðina? (valfrjálst)"
-                                />
-                            </div>
+                            {/* Comment field removed - not part of reviews table schema */}
                             
                             {message && (
                                 <div className={`p-3 rounded-lg ${
@@ -416,7 +601,7 @@ function ReviewPageContent() {
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                                    className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-blue-400 dark:disabled:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
                                 >
                                     {submitting ? 'Sendir mat...' : 'Senda mat'}
                                 </button>
@@ -426,14 +611,13 @@ function ReviewPageContent() {
                 </div>
             )}
 
-        
             {/* Homepage Link */}
             <div className="text-center pt-8">
                 <a
                     href="/"
                     className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
                 >
-                    ← Til baka á forsíðu
+                    ← Meta ferðina (Til baka á forsíðu)
                 </a>
             </div>
         </div>
