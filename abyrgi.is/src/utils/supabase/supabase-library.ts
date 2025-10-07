@@ -688,6 +688,90 @@ export const supabaseClient = {
   },
 
   /**
+   * Get order(s) with related data (user, staff, locations, car details)
+   * @param filter - Filter criteria (e.g., { column: 'order_id', value: 'uuid' } or { column: 'user_id', value: 'uuid' })
+   * @param schema - Optional schema name (defaults to 'abyrgi')
+   * @param options - Optional configuration
+   * @param options.single - Whether to return single order or array (defaults to false for array)
+   * @returns Order(s) with joined data or error
+   */
+  getOrder: async (
+    filter: { column: string; value: any },
+    schema = 'abyrgi',
+    options?: { single?: boolean }
+  ) => {
+    const orderSelect = `
+      order_id,
+      created_at,
+      user_id,
+      staff_id,
+      pickup_location_id,
+      dropoff_location_id,
+      status,
+      notes,
+      car_id,
+      user_profile:profiles!orders_user_id_fkey (
+        id,
+        name,
+        username,
+        address
+      ),
+      staff_profile:profiles!orders_staff_id_fkey (
+        id,
+        name,
+        username,
+        address
+      ),
+      pickup_location:locations!orders_pickup_location_id_fkey (
+        location_id,
+        name,
+        address,
+        latitude,
+        longitude
+      ),
+      dropoff_location:locations!orders_dropoff_location_id_fkey (
+        location_id,
+        name,
+        address,
+        latitude,
+        longitude
+      ),
+      car:cars!orders_car_id_fkey (
+        ${CAR_SELECT_COLUMNS}
+      )
+    `
+
+    const query = supabase
+      .schema(schema)
+      .from('orders')
+      .select(orderSelect)
+      .eq(filter.column, filter.value)
+
+    if (options?.single) {
+      const { data, error } = await query.single()
+      if (error) return { data: null, error }
+      
+      // Normalize car data if present
+      if (data?.car) {
+        data.car = normalizeCarRow(data.car)
+      }
+      
+      return { data, error: null }
+    } else {
+      const { data, error } = await query
+      if (error) return { data: null, error }
+      
+      // Normalize car data for each order if present
+      const normalizedData = (data || []).map((order: any) => ({
+        ...order,
+        car: order.car ? normalizeCarRow(order.car) : order.car
+      }))
+      
+      return { data: normalizedData, error: null }
+    }
+  },
+
+  /**
    * Place a booking order with location coordinates and car info
    * @param booking - Booking data with pickup location, car_id, and optional dropoff
    * @returns Inserted booking row or error
