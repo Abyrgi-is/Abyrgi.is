@@ -842,4 +842,128 @@ export const supabaseClient = {
       .single()
     return { data, error }
   },
+
+  /**
+   * Place a new review in abyrgi.reviews
+   * @param review - Review data (rating, user_id, order_id)
+   * @returns Inserted review row or error
+   */
+  placeReview: async (
+    review: {
+      rating: number;
+      user_id: string;
+      order_id: string;
+    },
+    schema = 'abyrgi'
+  ) => {
+    // Validate rating is within expected range
+    if (review.rating < 1 || review.rating > 5) {
+      return { data: null, error: { message: 'Rating must be between 1 and 5' } }
+    }
+
+    const row = {
+      rating: review.rating,
+      user_id: review.user_id,
+      order_id: review.order_id,
+    }
+    const { data, error } = await supabase
+      .schema(schema)
+      .from('reviews')
+      .insert(row)
+      .select('*')
+      .single()
+    return { data, error }
+  },
+
+  /**
+   * Get review(s) with related data (user profile, order details)
+   * @param filter - Filter criteria (e.g., { column: 'id', value: 123 } or { column: 'user_id', value: 'uuid' })
+   * @param schema - Optional schema name (defaults to 'abyrgi')
+   * @param options - Optional configuration
+   * @param options.single - Whether to return single review or array (defaults to false for array)
+   * @returns Review(s) with joined data or error
+   */
+  getReviews: async (
+    filter: { column: string; value: any },
+    schema = 'abyrgi',
+    options?: { single?: boolean }
+  ) => {
+    const reviewSelect = `
+      id,
+      created_at,
+      rating,
+      user_id,
+      order_id,
+      user_profile:profiles!reviews_user_id_fkey (
+        id,
+        name,
+        username,
+        address
+      ),
+      order:orders!reviews_order_id_fkey (
+        order_id,
+        created_at,
+        status,
+        notes,
+        user_profile:profiles!orders_user_id_fkey (
+          id,
+          name,
+          username
+        ),
+        staff_profile:profiles!orders_staff_id_fkey (
+          id,
+          name,
+          username
+        ),
+        pickup_location:locations!orders_pickup_location_id_fkey (
+          location_id,
+          name,
+          address,
+          latitude,
+          longitude
+        ),
+        dropoff_location:locations!orders_dropoff_location_id_fkey (
+          location_id,
+          name,
+          address,
+          latitude,
+          longitude
+        ),
+        car:cars!orders_car_id_fkey (
+          ${CAR_SELECT_COLUMNS}
+        )
+      )
+    `
+
+    const query = supabase
+      .schema(schema)
+      .from('reviews')
+      .select(reviewSelect)
+      .eq(filter.column, filter.value)
+
+    if (options?.single) {
+      const { data, error } = await query.single()
+      if (error) return { data: null, error }
+      
+      // Normalize car data in the order if present
+      if (data?.order?.car) {
+        data.order.car = normalizeCarRow(data.order.car)
+      }
+      
+      return { data, error: null }
+    } else {
+      const { data, error } = await query
+      if (error) return { data: null, error }
+      
+      // Normalize car data for each review's order if present
+      const normalizedData = (data || []).map((review: any) => ({
+        ...review,
+        order: review.order && review.order.car 
+          ? { ...review.order, car: normalizeCarRow(review.order.car) }
+          : review.order
+      }))
+      
+      return { data: normalizedData, error: null }
+    }
+  },
 }
