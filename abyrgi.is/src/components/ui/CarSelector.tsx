@@ -99,12 +99,12 @@ export default function CarSelector({ onCarSelect }: CarSelectorProps) {
               className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                 selectedCar?.id === car.id
                   ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-gray-300 hover:border-gray-300'
               }`}
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-semibold text-lg text-gray-500 dark:text-gray-500">
+                  <h3 style={{ color: selectedCar?.id === car.id ? 'gray' : 'inherit' }} className="font-semibold text-lg text-gray-500 dark:text-gray-500">
                     {car.make} {car.model}
                   </h3>
                   <p className="text-gray-500 dark:text-gray-500">{car.color} • {car.year}</p>

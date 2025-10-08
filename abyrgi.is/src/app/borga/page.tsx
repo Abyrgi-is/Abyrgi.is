@@ -105,9 +105,9 @@ export default function BorgaPage() {
             </div>
 
             {/* Pricing */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Verðlag</h2>
-                <div className="text-lg text-gray-700 space-y-2">
+                <div className="text-lg text-gray-700 dark:text-gray-200 space-y-2">
                     <p>Verð start gjald: <span className="font-semibold">1000kr</span></p>
                     <p>Km verð: <span className="font-semibold">250kr</span></p>
                     <p className="text-sm text-gray-500">
