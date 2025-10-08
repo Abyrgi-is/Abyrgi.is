@@ -838,10 +838,10 @@ export const supabaseClient = {
       
       // Normalize car data if present
       if (data?.car) {
-        (data as any).car = normalizeCarRow((data as any).car)
+        data.car = normalizeCarRow(data.car)
       }
-      
-      return { data: normalizedOrder, error: null }
+
+      return { data: data || null, error: null }
     } else {
       const { data, error } = await query
       if (error) return { data: null, error }
