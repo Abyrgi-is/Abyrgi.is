@@ -358,7 +358,92 @@ export const supabaseClient = {
       query = supabase.schema(schema).from(table).delete().eq(filter.column, filter.value)
     }
     const { data, error } = await query
+    
+    // Provide more helpful error messages for foreign key constraint violations
+    if (error) {
+      const errorCode = (error as any)?.code
+      const errorMsg = (error as any)?.message || ''
+      
+      // Check for foreign key constraint violation (PostgreSQL error code 23503)
+      if (errorCode === '23503' || /foreign key constraint/i.test(errorMsg)) {
+        if (isCarsTable(table) && /orders_car_id_fkey/i.test(errorMsg)) {
+          return {
+            data: null,
+            error: {
+              ...error,
+              message: 'Cannot delete car because it is referenced by existing orders. Use deleteCar() instead to automatically clear order references.',
+              code: errorCode,
+              hint: 'This car is being used in one or more orders. Use supabaseClient.deleteCar() to delete the car and automatically clear its references.'
+            }
+          }
+        }
+        
+        // Generic foreign key constraint message
+        return {
+          data: null,
+          error: {
+            ...error,
+            message: `Cannot delete ${table} record because it is referenced by other records. Please remove those references first.`,
+            code: errorCode,
+          }
+        }
+      }
+    }
+    
     return { data, error }
+  },
+
+  /**
+   * Delete a car and automatically clear its references from orders
+   * @param carId - The car_id to delete
+   * @param schema - Optional schema name (defaults to 'abyrgi')
+   * @returns Deletion result with metadata about cleared orders
+   */
+  deleteCar: async (
+    carId: string,
+    schema = 'abyrgi'
+  ) => {
+    // First, update all orders that reference this car to set car_id to null
+    const { data: clearedOrders, error: updateError } = await supabase
+      .schema(schema)
+      .from('orders')
+      .update({ car_id: null })
+      .eq('car_id', carId)
+      .select('order_id')
+
+    if (updateError) {
+      return {
+        data: null,
+        error: updateError,
+        step: 'clear_orders',
+        message: 'Failed to clear car references from orders'
+      }
+    }
+
+    // Now delete the car
+    const { data: deletedCar, error: deleteError } = await supabase
+      .schema(schema)
+      .from('cars')
+      .delete()
+      .eq('car_id', carId)
+      .select('*')
+
+    if (deleteError) {
+      return {
+        data: null,
+        error: deleteError,
+        step: 'delete_car',
+        message: 'Failed to delete car after clearing references'
+      }
+    }
+
+    return {
+      data: deletedCar,
+      error: null,
+      step: 'complete',
+      clearedOrdersCount: clearedOrders?.length || 0,
+      clearedOrders: clearedOrders || []
+    }
   },
 
   // Get user by email from database (for manual authentication)
@@ -753,7 +838,7 @@ export const supabaseClient = {
       
       // Normalize car data if present
       if (data?.car) {
-        data.car = normalizeCarRow(data.car)
+        (data as any).car = normalizeCarRow((data as any).car)
       }
       
       return { data, error: null }
