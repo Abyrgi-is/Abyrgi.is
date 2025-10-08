@@ -1,10 +1,10 @@
 'use client'
 
 import { supabaseClient } from '@/utils/supabase/supabase-library'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function SignInForm() {
+function SignInFormContent() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
@@ -222,5 +222,13 @@ export default function SignInForm() {
         </div>
       </div>
     </>
+  )
+}
+
+export default function SignInForm() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignInFormContent />
+    </Suspense>
   )
 }
