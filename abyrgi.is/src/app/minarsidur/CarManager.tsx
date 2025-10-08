@@ -103,16 +103,44 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
             </button>
 
             {showPopup && (
-                <div className="fixed inset-0 flex items-center justify-center z-50">
-                    <div className="absolute inset-0 bg-black/50 backdrop-blur-md"></div>
-                    <div className="bg-background text-foreground p-6 rounded shadow-xl max-w-md w-full relative border border-border z-10">
+                <div 
+                    className="fixed inset-0 grid place-items-center p-8"
+                    style={{ zIndex: 9999 }}
+                >
+                    {/* Backdrop */}
+                    <div 
+                        className="absolute inset-0 bg-black/50"
+                        onClick={() => setShowPopup(false)}
+                    ></div>
+                    
+                    {/* Modal */}
+                    <div 
+                        className="relative z-10 border w-full max-w-md max-h-[85vh] overflow-y-auto p-6 rounded-lg shadow-xl"
+                        style={{ 
+                            marginTop: '21vh',
+                            background: '#FFFFFF',
+                            color: '#15121A',
+                            borderColor: 'rgba(21, 18, 26, 0.1)'
+                        }}
+                    >
+                        <style jsx>{`
+                            @media (prefers-color-scheme: dark) {
+                                div {
+                                    background: #1f1c24 !important;
+                                    color: #F7F8FA !important;
+                                    border-color: rgba(247, 248, 250, 0.15) !important;
+                                }
+                            }
+                        `}</style>
+                        {/* Close button */}
                         <button
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            className="absolute top-3 right-3 text-4xl leading-none text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 w-10 h-10 flex items-center justify-center border-0 bg-transparent cursor-pointer"
                             onClick={() => setShowPopup(false)}
                         >
-                            &times;
+                            ×
                         </button>
-                        <h2 className="text-xl font-bold mb-4">Add Car</h2>
+                        
+                        <h2 className="text-xl font-bold mb-4 pr-12">Add Car</h2>
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault();

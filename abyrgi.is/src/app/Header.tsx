@@ -220,22 +220,30 @@ export function Header() {
           display: flex;
           align-items: center;
           position: relative;
+          color: #FFFFFF; 
         }
         .header-logo {
           font-weight: bold;
           font-size: 1.2rem;
+          color: #FFFFFF; 
+        }
+        .header-logo a {
+          color: #FFFFFF !important; 
+          text-decoration: none;
         }
         .header-links {
           display: flex;
           gap: 2rem;
           margin-left: auto;
         }
-        .header-links a {
-          color: inherit;
+        .header-links a,
+        .header-links button {
+          color: #FFFFFF !important; /* Force white */
           text-decoration: none;
           padding: 0.5rem 0;
         }
-        .header-links a:hover {
+        .header-links a:hover,
+        .header-links button:hover {
           text-decoration: underline;
         }
         .header-hamburger {
@@ -245,6 +253,7 @@ export function Header() {
           border: none;
           font-size: 2rem;
           cursor: pointer;
+          color: #FFFFFF; /* Force white */
         }
         .header-dropdown {
           display: none;
@@ -259,8 +268,8 @@ export function Header() {
           z-index: 100;
         }
         .header-dropdown a,
-        .header-dropdown-button {
-          display: none;
+        .header-dropdown button {
+          display: block;
           padding: 0.75rem 1rem;
           text-decoration: none;
           color: #0070f3;
@@ -274,10 +283,9 @@ export function Header() {
           transition: all 0.2s ease;
         }
         .header-dropdown a:hover,
-        .header-dropdown-button:hover {
+        .header-dropdown button:hover {
           background: #f0f8ff;
           text-decoration: underline;
-          cursor: pointer;
         }
         /* Responsive styles */
         @media (max-width: 700px) {

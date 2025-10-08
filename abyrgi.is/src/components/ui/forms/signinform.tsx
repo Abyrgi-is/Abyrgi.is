@@ -32,7 +32,6 @@ export default function SignInForm() {
         setMessage(`❌ Sign-in failed: ${error.message}`)
       } else {
         setMessage('✅ Sign-in successful!')
-        // Redirect to the intended page or default to minarsidur
         const redirectTo = searchParams.get('redirect') || '/minarsidur'
         router.push(redirectTo)
       }
@@ -44,159 +43,184 @@ export default function SignInForm() {
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      backgroundColor: '#f4f4f9',
-      fontFamily: 'Arial, sans-serif',
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: 400,
-        backgroundColor: '#ffffff',
-        padding: 30,
-        borderRadius: 8,
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      }}>
-        <h2 style={{
-          textAlign: 'center',
-          marginBottom: 20,
-          color: '#333',
-        }}>Sign In</h2>
+    <>
+      <style jsx>{`
+        .page-wrapper {
+          background: #F7F8FA;
+        }
+        .form-card {
+          background: white;
+          color: #15121A;
+        }
+        .form-title {
+          color: #15121A;
+        }
+        .confirmation-box {
+          background: #dbeafe;
+          color: #1e40af;
+          border-color: #bfdbfe;
+        }
+        .form-label {
+          color: #15121A;
+        }
+        .form-input {
+          border-color: #d1d5db;
+          background: white;
+          color: #15121A;
+        }
+        .form-input:focus {
+          border-color: #3b82f6;
+        }
+        .submit-button {
+          background: #2563eb;
+          color: white;
+        }
+        .submit-button:hover:not(:disabled) {
+          background: #1d4ed8;
+        }
+        .submit-button:disabled {
+          background: #9ca3af;
+        }
+        .success-message {
+          background: #d1fae5;
+          color: #065f46;
+          border-color: #6ee7b7;
+        }
+        .error-message {
+          background: #fee2e2;
+          color: #991b1b;
+          border-color: #fca5a5;
+        }
+        .footer-text {
+          color: #6b7280;
+        }
+        .footer-link {
+          color: #2563eb;
+        }
+        .footer-link:hover {
+          color: #1d4ed8;
+        }
 
-        {confirmationMessage && (
-          <div style={{
-            marginBottom: 20,
-            padding: 15,
-            backgroundColor: '#e3f2fd',
-            color: '#1565c0',
-            borderRadius: 4,
-            border: '1px solid #90caf9',
-            textAlign: 'center',
-            fontSize: 14,
-            lineHeight: '1.4',
-          }}>
-            📧 {confirmationMessage}
-          </div>
-        )}
+        @media (prefers-color-scheme: dark) {
+          .page-wrapper {
+            background: #15121A;
+          }
+          .form-card {
+            background: #1e293b;
+            color: #F7F8FA;
+          }
+          .form-title {
+            color: #F7F8FA;
+          }
+          .confirmation-box {
+            background: rgba(30, 58, 138, 0.3);
+            color: #93c5fd;
+            border-color: #1e40af;
+          }
+          .form-label {
+            color: #F7F8FA;
+          }
+          .form-input {
+            border-color: #4b5563;
+            background: #374151;
+            color: #F7F8FA;
+          }
+          .form-input:focus {
+            border-color: #3b82f6;
+          }
+          .submit-button:disabled {
+            background: #4b5563;
+          }
+          .success-message {
+            background: rgba(5, 150, 105, 0.3);
+            color: #6ee7b7;
+            border-color: #059669;
+          }
+          .error-message {
+            background: rgba(153, 27, 27, 0.3);
+            color: #fca5a5;
+            border-color: #991b1b;
+          }
+          .footer-text {
+            color: #9ca3af;
+          }
+          .footer-link {
+            color: #60a5fa;
+          }
+          .footer-link:hover {
+            color: #93c5fd;
+          }
+        }
+      `}</style>
+      
+      <div className="page-wrapper flex justify-center items-center min-h-screen font-sans">
+        <div className="form-card w-full max-w-md p-8 rounded-lg shadow-md">
+          <h2 className="form-title text-center text-2xl font-semibold mb-6">
+            Sign In
+          </h2>
 
-        <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: 20 }}>
-            <label style={{
-              display: 'block',
-              marginBottom: 8,
-              fontWeight: 'bold',
-              color: '#555',
-            }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 16,
-                outline: 'none',
-                transition: 'border-color 0.2s',
-              }}
-              placeholder="Enter your email"
-              onFocus={(e) => e.target.style.borderColor = '#007bff'}
-              onBlur={(e) => e.target.style.borderColor = '#ddd'}
-            />
-          </div>
+          {confirmationMessage && (
+            <div className="confirmation-box mb-5 p-4 rounded border text-center text-sm leading-relaxed">
+              📧 {confirmationMessage}
+            </div>
+          )}
 
-          <div style={{ marginBottom: 20 }}>
-            <label style={{
-              display: 'block',
-              marginBottom: 8,
-              fontWeight: 'bold',
-              color: '#555',
-            }}>
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                fontSize: 16,
-                outline: 'none',
-                transition: 'border-color 0.2s',
-              }}
-              placeholder="Enter your password"
-              onFocus={(e) => e.target.style.borderColor = '#007bff'}
-              onBlur={(e) => e.target.style.borderColor = '#ddd'}
-            />
-          </div>
+          <form onSubmit={handleLogin}>
+            <div className="mb-5">
+              <label className="form-label block mb-2 font-semibold">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="form-input w-full px-3 py-2 border rounded outline-none transition-colors"
+                placeholder="Enter your email"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: loading ? '#ccc' : '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: 4,
-              fontSize: 16,
-              fontWeight: 'bold',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.2s',
-            }}
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
+            <div className="mb-5">
+              <label className="form-label block mb-2 font-semibold">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="form-input w-full px-3 py-2 border rounded outline-none transition-colors"
+                placeholder="Enter your password"
+              />
+            </div>
 
-        {message && (
-          <div style={{
-            marginTop: 20,
-            padding: 15,
-            backgroundColor: message.includes('✅') ? '#d4edda' : '#f8d7da',
-            color: message.includes('✅') ? '#155724' : '#721c24',
-            borderRadius: 4,
-            border: `1px solid ${message.includes('✅') ? '#c3e6cb' : '#f5c6cb'}`,
-            textAlign: 'center',
-          }}>
-            {message}
-          </div>
-        )}
-
-        <div style={{
-          marginTop: 20,
-          textAlign: 'center',
-        }}>
-          <p style={{
-            fontSize: 14,
-            color: '#666',
-            margin: 0,
-          }}>
-            Don&apos;t have an account?{' '}
-            <a 
-              href="/sign_up" 
-              style={{
-                color: '#007bff',
-                textDecoration: 'underline',
-              }}
+            <button
+              type="submit"
+              disabled={loading}
+              className="submit-button w-full py-3 font-semibold rounded transition-colors cursor-pointer disabled:cursor-not-allowed"
             >
-              Sign up
-            </a>
-          </p>
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+
+          {message && (
+            <div className={`mt-5 p-4 rounded border text-center ${
+              message.includes('✅') ? 'success-message' : 'error-message'
+            }`}>
+              {message}
+            </div>
+          )}
+
+          <div className="mt-5 text-center">
+            <p className="footer-text text-sm m-0">
+              Don&apos;t have an account?{' '}
+              <a href="/sign_up" className="footer-link underline">
+                Sign up
+              </a>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
