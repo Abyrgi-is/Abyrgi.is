@@ -795,26 +795,14 @@ export const supabaseClient = {
       status,
       notes,
       car_id,
-      user_profile:profiles!orders_user_id_fkey (
-        id,
-        name,
-        username,
-        address
-      ),
-      staff_profile:profiles!orders_staff_id_fkey (
-        id,
-        name,
-        username,
-        address
-      ),
-      pickup_location:locations!orders_pickup_location_id_fkey (
+      pickup_location:locations!fk_pickup_location (
         location_id,
         name,
         address,
         latitude,
         longitude
       ),
-      dropoff_location:locations!orders_dropoff_location_id_fkey (
+      dropoff_location:locations!fk_dropoff_location (
         location_id,
         name,
         address,
@@ -836,20 +824,78 @@ export const supabaseClient = {
       const { data, error } = await query.single()
       if (error) return { data: null, error }
       
+      // Fetch user and staff profiles separately if needed
+      let userProfile = null
+      let staffProfile = null
+      
+      if (data) {
+        if (data.user_id) {
+          const { data: userProfileData } = await supabase
+            .schema(schema)
+            .from('profiles')
+            .select('id, name, username, address')
+            .eq('id', data.user_id)
+            .single()
+          userProfile = userProfileData
+        }
+        
+        if (data.staff_id) {
+          const { data: staffProfileData } = await supabase
+            .schema(schema)
+            .from('profiles')
+            .select('id, name, username, address')
+            .eq('id', data.staff_id)
+            .single()
+          staffProfile = staffProfileData
+        }
+      }
+      
       // Normalize car data if present
       const normalizedOrder = data ? {
         ...data,
+        user_profile: userProfile,
+        staff_profile: staffProfile,
         car: data.car ? normalizeCarRow(data.car as any) : data.car
       } : data
 
-      return { data: data || null, error: null }
+      return { data: normalizedOrder || null, error: null }
     } else {
       const { data, error } = await query
       if (error) return { data: null, error }
       
-      // Normalize car data for each order if present
+      // Collect unique profile IDs
+      const profileIds: string[] = []
+      for (const order of (data || [])) {
+        if (order.user_id && profileIds.indexOf(order.user_id) === -1) {
+          profileIds.push(order.user_id)
+        }
+        if (order.staff_id && profileIds.indexOf(order.staff_id) === -1) {
+          profileIds.push(order.staff_id)
+        }
+      }
+      
+      // Fetch profiles in bulk
+      const profilesById: Record<string, any> = {}
+      
+      if (profileIds.length > 0) {
+        const profilesResult = await supabase
+          .schema(schema)
+          .from('profiles')
+          .select('id, name, username, address')
+          .in('id', profileIds)
+        
+        if (profilesResult.data) {
+          for (const profile of profilesResult.data) {
+            profilesById[profile.id] = profile
+          }
+        }
+      }
+      
+      // Normalize car data for each order and add profiles
       const normalizedData = (data || []).map((order: any) => ({
         ...order,
+        user_profile: order.user_id ? profilesById[order.user_id] : null,
+        staff_profile: order.staff_id ? profilesById[order.staff_id] : null,
         car: order.car ? normalizeCarRow(order.car) : order.car
       }))
       
@@ -1054,5 +1100,87 @@ export const supabaseClient = {
       
       return { data: normalizedData, error: null }
     }
+  },
+
+  /**
+   * Get all orders with location and user details
+   * @param schema - Optional schema name (defaults to 'abyrgi')
+   * @returns All orders with joined data or error
+   */
+  getAllOrdersWithLocations: async (schema = 'abyrgi') => {
+    const orderSelect = `
+      order_id,
+      created_at,
+      user_id,
+      staff_id,
+      pickup_location_id,
+      dropoff_location_id,
+      status,
+      notes,
+      car_id,
+      pickup_location:locations!fk_pickup_location (
+        location_id,
+        name,
+        address,
+        latitude,
+        longitude
+      ),
+      dropoff_location:locations!fk_dropoff_location (
+        location_id,
+        name,
+        address,
+        latitude,
+        longitude
+      ),
+      car:cars!orders_car_id_fkey (
+        ${CAR_SELECT_COLUMNS}
+      )
+    `
+
+    const { data, error } = await supabase
+      .schema(schema)
+      .from('orders')
+      .select(orderSelect)
+      .order('created_at', { ascending: false })
+
+    if (error) return { data: null, error }
+    
+    // Collect unique profile IDs
+    const profileIds: string[] = []
+    for (const order of (data || [])) {
+      if (order.user_id && profileIds.indexOf(order.user_id) === -1) {
+        profileIds.push(order.user_id)
+      }
+      if (order.staff_id && profileIds.indexOf(order.staff_id) === -1) {
+        profileIds.push(order.staff_id)
+      }
+    }
+    
+    // Fetch profiles in bulk
+    const profilesById: Record<string, any> = {}
+    
+    if (profileIds.length > 0) {
+      const profilesResult = await supabase
+        .schema(schema)
+        .from('profiles')
+        .select('id, name, username, address')
+        .in('id', profileIds)
+      
+      if (profilesResult.data) {
+        for (const profile of profilesResult.data) {
+          profilesById[profile.id] = profile
+        }
+      }
+    }
+    
+    // Normalize car data for each order and add profiles
+    const normalizedData = (data || []).map((order: any) => ({
+      ...order,
+      user_profile: order.user_id ? profilesById[order.user_id] : null,
+      staff_profile: order.staff_id ? profilesById[order.staff_id] : null,
+      car: order.car ? normalizeCarRow(order.car) : order.car
+    }))
+    
+    return { data: normalizedData, error: null }
   },
 }
