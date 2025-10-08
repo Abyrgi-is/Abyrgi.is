@@ -79,27 +79,6 @@ footer {
   background-color: #475569 !important;
 }
 
-/* Ensure good contrast on your color scheme */
-.page-content h1,
-.page-content h2,
-.page-content h3,
-.page-content h4,
-.page-content h5,
-.page-content h6 {
-  color: #15121A;
-}
-
-@media (prefers-color-scheme: dark) {
-  .page-content h1,
-  .page-content h2,
-  .page-content h3,
-  .page-content h4,
-  .page-content h5,
-  .page-content h6 {
-    color: #F7F8FA;
-  }
-}
-
 /* Button and link styling for your color scheme */
 .page-content button,
 .page-content .btn {

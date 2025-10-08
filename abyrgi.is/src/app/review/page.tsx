@@ -446,12 +446,19 @@ function ReviewPageContent() {
         <div className="max-w-4xl mx-auto p-6 space-y-8">
             {/* Header */}
             <div className="text-center">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                <h1 className="text-3xl font-bold mb-2" style={{ color: '#15121A' }}>
                     Ferðamat
                 </h1>
                 <p className="text-gray-600 dark:text-gray-300">
                     Gefðu okkur umsögn um ferðina þína
                 </p>
+                <style jsx>{`
+                    @media (prefers-color-scheme: dark) {
+                        h1 {
+                            color: #F7F8FA !important;
+                        }
+                    }
+                `}</style>
             </div>
 
             {/* Completed Trip to Review */}
@@ -511,9 +518,16 @@ function ReviewPageContent() {
             {/* Reviews List */}
             {reviews.length > 0 && (
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                    <h2 className="text-2xl font-bold mb-6" style={{ color: '#15121A' }}>
                         Þínar umsagnir
                     </h2>
+                    <style jsx>{`
+                        @media (prefers-color-scheme: dark) {
+                            h2 {
+                                color: #F7F8FA !important;
+                            }
+                        }
+                    `}</style>
                     <div className="space-y-6">
                         {reviews.map((review) => (
                             <ReviewCard key={review.id} review={review} />
@@ -526,12 +540,19 @@ function ReviewPageContent() {
             {reviews.length === 0 && completedTrips.length === 0 && !loading && (
                 <div className="text-center py-12">
                     <div className="text-6xl mb-4">🚗</div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    <h3 className="text-xl font-semibold mb-2" style={{ color: '#15121A' }}>
                         Engar ferðir til umsagnar
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
                         Þegar þú hefur lokið ferð muntu geta gefið henni umsögn hér.
                     </p>
+                    <style jsx>{`
+                        @media (prefers-color-scheme: dark) {
+                            h3 {
+                                color: #F7F8FA !important;
+                            }
+                        }
+                    `}</style>
                 </div>
             )}
 
