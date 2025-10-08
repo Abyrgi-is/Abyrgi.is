@@ -752,11 +752,12 @@ export const supabaseClient = {
       if (error) return { data: null, error }
       
       // Normalize car data if present
-      if (data?.car) {
-        data.car = normalizeCarRow(data.car)
-      }
+      const normalizedOrder = data ? {
+        ...data,
+        car: data.car ? normalizeCarRow(data.car as any) : data.car
+      } : data
       
-      return { data, error: null }
+      return { data: normalizedOrder, error: null }
     } else {
       const { data, error } = await query
       if (error) return { data: null, error }
@@ -841,5 +842,75 @@ export const supabaseClient = {
       .select('*')
       .single()
     return { data, error }
+  },
+
+  /**
+   * Get all orders with their pickup and dropoff locations
+   * Used primarily for staff to see all active orders on a map
+   * @param schema - Optional schema name (defaults to 'abyrgi')
+   * @param status - Optional status filter (e.g., 'pending', 'active', 'completed')
+   * @returns Array of orders with location details or error
+   */
+  getAllOrdersWithLocations: async (
+    schema = 'abyrgi',
+    status?: string
+  ) => {
+    const orderSelect = `
+      order_id,
+      created_at,
+      user_id,
+      staff_id,
+      status,
+      notes,
+      car_id,
+      pickup_location:locations!fk_pickup_location (
+        location_id,
+        name,
+        address,
+        latitude,
+        longitude
+      ),
+      dropoff_location:locations!fk_dropoff_location (
+        location_id,
+        name,
+        address,
+        latitude,
+        longitude
+      ),
+      car:cars!orders_car_id_fkey (
+        ${CAR_SELECT_COLUMNS}
+      )
+    `
+
+    let query = supabase
+      .schema(schema)
+      .from('orders')
+      .select(orderSelect)
+
+    if (status) {
+      query = query.eq('status', status)
+    }
+
+    const { data, error } = await query
+    
+    console.log('[getAllOrdersWithLocations] Query result:', { 
+      dataCount: data?.length || 0, 
+      error: error?.message,
+      status: status || 'all',
+      schema
+    })
+    
+    if (error) {
+      console.error('[getAllOrdersWithLocations] Error:', error)
+      return { data: null, error }
+    }
+
+    // Normalize car data for each order if present
+    const normalizedData = (data || []).map((order: any) => ({
+      ...order,
+      car: order.car ? normalizeCarRow(order.car) : order.car
+    }))
+
+    return { data: normalizedData, error: null }
   },
 }
