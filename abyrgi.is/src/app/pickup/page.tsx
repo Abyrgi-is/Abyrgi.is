@@ -99,7 +99,7 @@ function PickupPageContent() {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-lg">Hleður korti...</p>
+          <p className="mt-4 text-lg text-gray-900 dark:text-gray-100">Hleður korti...</p>
         </div>
       </div>
     );
@@ -109,7 +109,7 @@ function PickupPageContent() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <p className="text-red-600 text-lg">Villa við að hlaða korti</p>
+          <p className="text-red-600 text-lg dark:text-red-400">Villa við að hlaða korti</p>
           <button 
             onClick={() => window.location.reload()} 
             className="mt-4 px-4 py-2 themed-button rounded"
@@ -123,15 +123,26 @@ function PickupPageContent() {
 
   return (
     <div className="h-screen flex flex-col">
-      <div className="bg-white shadow-sm border-b p-4">
-        <h1 className="text-2xl font-bold">Sækja - Leiðsögn</h1>
+      <div className="shadow-sm border-b p-4" style={{ background: '#ffffff', borderColor: '#e5e7eb' }}>
+        <h1 className="text-2xl font-bold" style={{ color: '#15121A' }}>Sækja - Leiðsögn</h1>
         {error && (
-          <p className="text-amber-600 text-sm mt-1">{error}</p>
+          <p className="text-amber-600 text-sm mt-1 dark:text-amber-400">{error}</p>
         )}
         <div className="mt-2 flex flex-wrap gap-4 text-sm opacity-70">
-          <span>� Starfsmenn</span>
+          <span>🚗 Starfsmenn</span>
           <span>📍 Þín staðsetning</span>
         </div>
+        <style jsx>{`
+          @media (prefers-color-scheme: dark) {
+            div {
+              background: #1f2937 !important;
+              border-color: #374151 !important;
+            }
+            h1 {
+              color: #F7F8FA !important;
+            }
+          }
+        `}</style>
       </div>
       
       <div className="flex-1 relative">

@@ -104,7 +104,7 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
 
             {showPopup && (
                 <div 
-                    className="fixed inset-0 grid place-items-center p-8"
+                    className="fixed inset-0 grid place-items-center p-0.1"
                     style={{ zIndex: 9999 }}
                 >
                     {/* Backdrop */}
@@ -115,9 +115,9 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
                     
                     {/* Modal */}
                     <div 
-                        className="relative z-10 border w-full max-w-md max-h-[85vh] overflow-y-auto p-6 rounded-lg shadow-xl"
+                        className="relative z-10 border w-full max-w-2xl max-h-[88vh] overflow-y-auto p-6 rounded-lg shadow-xl"
                         style={{ 
-                            marginTop: '21vh',
+                            marginTop: '29vh',
                             background: '#FFFFFF',
                             color: '#15121A',
                             borderColor: 'rgba(21, 18, 26, 0.1)'

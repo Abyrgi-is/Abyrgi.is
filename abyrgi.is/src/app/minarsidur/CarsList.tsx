@@ -19,7 +19,7 @@ export default function CarsList({ cars, loading, error }: CarsListProps) {
         <div
           key={car.car_id}
           style={{ background: "#000", color: "#fff", border: "1px solid #222" }}
-          className="w-full max-w-md rounded overflow-hidden shadow-lg hover:scale-105 transform transition"
+          className="w-full max-w-md rounded overflow-hidden shadow-lg transform transition"
         >
           <div style={{ padding: "1.5rem" }}>
             <div style={{ fontWeight: "bold", fontSize: "1.25rem", marginBottom: "0.5rem" }}>
