@@ -171,6 +171,7 @@ export function Header() {
           Mínar Síður
         </Link>
         )}
+        {userAuthenticated && (
         <Link href="/stadsetnig"
           style={{
             display: "block",
@@ -181,6 +182,31 @@ export function Header() {
         onClick={() => setMenuOpen(false)}>
           Panta
         </Link>
+        )}
+        {isDriver && (
+        <Link href="/pickup"
+          style={{
+            display: "block",
+            padding: "0.75rem 1rem",
+            textDecoration: "none",
+            color: "#0070f3",
+          }}
+        onClick={() => setMenuOpen(false)}>
+          Pickup
+        </Link>
+        )}
+        {(isStaff || isDriver) && (
+        <Link href="/dropoff"
+          style={{
+            display: "block",
+            padding: "0.75rem 1rem",
+            textDecoration: "none",
+            color: "#0070f3",
+          }}
+        onClick={() => setMenuOpen(false)}>
+          Dropoff
+        </Link>
+        )}
         {userAuthenticated ? (
           <button
             onClick={() => {
