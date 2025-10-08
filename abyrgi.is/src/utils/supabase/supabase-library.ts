@@ -845,7 +845,7 @@ export const supabaseClient = {
 
   /**
    * Place a new review in abyrgi.reviews
-   * @param review - Review data (rating, user_id, order_id)
+   * @param review - Review data (rating, user_id, order_id, review_text?)
    * @returns Inserted review row or error
    */
   placeReview: async (
@@ -853,6 +853,7 @@ export const supabaseClient = {
       rating: number;
       user_id: string;
       order_id: string;
+      review_text?: string | null;
     },
     schema = 'abyrgi'
   ) => {
@@ -865,6 +866,7 @@ export const supabaseClient = {
       rating: review.rating,
       user_id: review.user_id,
       order_id: review.order_id,
+      review_text: review.review_text ?? null,
     }
     const { data, error } = await supabase
       .schema(schema)
@@ -877,7 +879,7 @@ export const supabaseClient = {
 
   /**
    * Get review(s) with related data (user profile, order details)
-   * @param filter - Filter criteria (e.g., { column: 'id', value: 123 } or { column: 'user_id', value: 'uuid' })
+   * @param filter - Filter criteria (e.g., { column: 'id', value: 'uuid' } or { column: 'user_id', value: 'uuid' })
    * @param schema - Optional schema name (defaults to 'abyrgi')
    * @param options - Optional configuration
    * @param options.single - Whether to return single review or array (defaults to false for array)
@@ -894,6 +896,7 @@ export const supabaseClient = {
       rating,
       user_id,
       order_id,
+      review_text,
       user_profile:profiles!reviews_user_id_fkey (
         id,
         name,
@@ -946,8 +949,8 @@ export const supabaseClient = {
       if (error) return { data: null, error }
       
       // Normalize car data in the order if present
-      if (data?.order?.car) {
-        data.order.car = normalizeCarRow(data.order.car)
+      if (data?.order && (data.order as any)?.car) {
+        (data.order as any).car = normalizeCarRow((data.order as any).car)
       }
       
       return { data, error: null }
