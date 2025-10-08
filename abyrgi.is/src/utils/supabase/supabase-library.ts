@@ -752,11 +752,12 @@ export const supabaseClient = {
       if (error) return { data: null, error }
       
       // Normalize car data if present
-      if (data?.car) {
-        data.car = normalizeCarRow(data.car)
-      }
+      const normalizedOrder = data ? {
+        ...data,
+        car: data.car ? normalizeCarRow(data.car as any) : data.car
+      } : data
       
-      return { data, error: null }
+      return { data: normalizedOrder, error: null }
     } else {
       const { data, error } = await query
       if (error) return { data: null, error }
