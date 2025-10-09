@@ -52,7 +52,7 @@ Markmið forritsins er að stuðla að auknu öryggi í umferðinni, draga úr d
 # Wireframe:
 
 ![wireframe](./wireframe_user.jpg)
-![wireframe](./IMG_0284.HEIC)
+![wireframe](./IMG_0284.jpg)
 ---
 
 ## 🧱 Tæknistafli
