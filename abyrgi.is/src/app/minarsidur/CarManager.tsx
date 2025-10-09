@@ -78,16 +78,31 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
 
         setMessage("Deleting...");
         
-
-        const { data, error } = await supabaseClient.deleteRows(
+        // First, find the car by plate to get its car_id
+        const { data: cars, error: fetchError } = await supabaseClient.fetchData(
             "cars",
-            { column: "plate", value: plateToDelete },
             "abyrgi"
         );
         
-        if (error) setMessage("Error: " + error.message);
-        else {
-            setMessage("Car deleted!");
+        if (fetchError) {
+            setMessage("Error: " + fetchError.message);
+            return;
+        }
+        
+        const carToDelete = cars?.find((car: any) => car.plate === plateToDelete);
+        
+        if (!carToDelete) {
+            setMessage("Error: Car not found with that plate");
+            return;
+        }
+
+        // Now use the deleteCar function with the car_id
+        const result = await supabaseClient.deleteCar(carToDelete.car_id, "abyrgi");
+        
+        if (result.error) {
+            setMessage("Error: " + result.message);
+        } else {
+            setMessage(`Car deleted! ${result.clearedOrdersCount} order(s) updated.`);
             onCarChange(); // Trigger refresh of cars list
         }
         setPlateToDelete("");
