@@ -4,7 +4,7 @@
 - **VEFÞ3VÞ05DU-Hát Vefforritun II, Tölvubraut, Tækniskólin**
 - **[Skoða Ábyrgð](https://abyrgi.afd.is/)**
 
-<video src="./user-flow-myndband.mp4" controls></video>
+
 
 
 
@@ -109,3 +109,8 @@ npm start
 
 
 [View the Database Schema SQL](database/database_schema.sql)
+
+## Userflow
+
+[🎥 Watch the user flow video](user-flow-myndband.mp4)
+
