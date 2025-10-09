@@ -1,7 +1,7 @@
 # Abyrgi.is
 
-**Höfundar eru Ari Frímannsson, Aron Frosti Davíðsson, Pétur Jónsson
-- **VEFÞ3VÞ05DU-Hát Vefforritun II, Tölvubraut, Tækniskólin 
+**Höfundar eru Ari Frímannsson, Aron Frosti Davíðsson, Pétur Jónsson**
+- **VEFÞ3VÞ05DU-Hát Vefforritun II, Tölvubraut, Tækniskólin**
 
 ---
 
@@ -53,5 +53,44 @@ Markmið forritsins er að stuðla að auknu öryggi í umferðinni, draga úr d
 
 ![wireframe](./wireframe_user.jpg)
 
-# Höfundar eru
-Pétur, Ari, Aron
+---
+
+## 🧱 Tæknistafli
+
+| Flokkur | Tækni | Lýsing |
+|----------|--------|--------|
+| **Ramma & Keyrsluumhverfi** | [Next.js 15](https://nextjs.org) | React-rammi með stuðningi við **Turbopack** fyrir hraðari þróun og build. |
+| | [React 19](https://react.dev) | Grunnur notendaviðmótsins. |
+| | [TypeScript 5](https://www.typescriptlang.org) | Bætir við gerðavörn og áreiðanleika í kóðanum. |
+| **Útlit & Hönnun** | [Tailwind CSS 4](https://tailwindcss.com) | Nútímalegt gagnvirkt CSS kerfi. |
+| | [tw-animate-css](https://www.npmjs.com/package/tw-animate-css) | Hreyfingar (animations) fyrir Tailwind. |
+| | [class-variance-authority](https://www.npmjs.com/package/class-variance-authority) | Stjórnun CSS-klassa á skipulegan hátt. |
+| | [clsx](https://www.npmjs.com/package/clsx) | Sameinar CSS-klassa á hreinan hátt. |
+| | [tailwind-merge](https://www.npmjs.com/package/tailwind-merge) | Sameinar Tailwind-klassa og forðast tvítekningar. |
+| | [@radix-ui/react-label](https://www.radix-ui.com/docs/primitives/components/label) | Aðgengilegt form-label frá Radix UI. |
+| | [lucide-react](https://lucide.dev) | Táknmyndasafn (icons) fyrir React. |
+| **Kort & Staðsetning** | [Leaflet](https://leafletjs.com) | Létt og öflugt bókasafn fyrir gagnvirk kort. |
+| | [React-Leaflet](https://react-leaflet.js.org) | React-umbúðir utan um Leaflet. |
+| | [Leaflet Routing Machine](https://www.liedman.net/leaflet-routing-machine/) | Reiknar og birtir leiðir (routing) á kortum. |
+| **Bakendi & Gagnageymsla** | [Supabase (SSR)](https://supabase.com) | Gagnagrunnur, auðkenning og API með server-side rendering stuðningi. |
+| **Kóðaeftirlit & Þróunartól** | [ESLint 9](https://eslint.org) | Greinir og viðheldur hreinum kóða. |
+| | [eslint-config-next](https://nextjs.org/docs/pages/building-your-application/configuring/eslint) | ESLint stillingar fyrir Next.js. |
+| | [PostCSS 8](https://postcss.org) | CSS vinnsla fyrir Tailwind. |
+| | [@types/* pakkar](https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html) | Gerðastuðningur fyrir TypeScript. |
+
+---
+
+### 🚀 Fljótleg uppsetning
+
+```bash
+# Setja upp dependencies
+npm install
+
+# Keyra í þróunarham með Turbopack
+npm run dev
+
+# Byggja verkefnið
+npm run build
+
+# Keyra production build
+npm start
