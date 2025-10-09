@@ -42,16 +42,32 @@ export default function OrderPage() {
                 <div className="space-y-3">
                     <Link
                         href="/minarsidur"
-                        className="block w-full py-3 px-6 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                        className="block w-full py-3 px-6 rounded-lg font-semibold transition-colors order-link-primary"
                     >
                         Sjá mínar pantanir
                     </Link>
                     <Link
                         href="/"
-                        className="block w-full py-3 px-6 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                        className="block w-full py-3 px-6 rounded-lg font-semibold transition-colors order-link-secondary"
                     >
                         Til baka á forsíðu
                     </Link>
+                    <style jsx>{`
+                        :global(.order-link-primary) {
+                            background-color: #1e40af !important;
+                            color: #ffffff !important;
+                        }
+                        :global(.order-link-primary:hover) {
+                            background-color: #60a5fa !important;
+                        }
+                        :global(.order-link-secondary) {
+                            background-color: #93c5fd !important;
+                            color: #1e293b !important;
+                        }
+                        :global(.order-link-secondary:hover) {
+                            background-color: #9ca3af !important;
+                        }
+                    `}</style>
                 </div>
             </div>
         </div>
