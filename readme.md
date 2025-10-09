@@ -110,6 +110,17 @@ npm start
 
 [View the Database Schema SQL](database/database_schema.sql)
 
+---
+
+
+## skýring á sérvirkni.
+okkar ér virkni var í raun ekki mikil það var kortið sem við náðum ekki alveg að klára vegna þess að tíminn var bara lítil 
+
+## API notkun 
+við vorum ekki með neina apis keys nemma bara fyrir supabase 
+
+---
+
 ## Userflow
 
 [🎥 Watch the user flow video](user-flow-myndband.mp4)
