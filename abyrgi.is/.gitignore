@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# supabase folder not for production
-/supabase
+# supabase test pages not for production
+src/app/supabase/
