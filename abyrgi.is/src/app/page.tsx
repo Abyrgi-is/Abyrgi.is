@@ -1,103 +1,123 @@
+"use client";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabaseClient } from "@/utils/supabase/supabase-library";
+
+function HeroSection() {
+  return (
+    <>
+      <h1 className="text-3xl font-bold mb-4">Velkomin á Abyrgi.is</h1>
+      <p className="text-lg mb-6">
+        Við sækjum bílinn þinn og keyrum hann örugglega heim, og ef þú vilt, færð þú líka far með!
+      </p>
+      <div className="flex justify-center">
+        <Image
+          src="/images/Car_with_logo.png"
+          alt="Bíll með Abyrgi logo"
+          width={700}
+          height={350}
+          className="rounded-xl my-8"
+        />
+      </div>
+    </>
+  );
+}
+
+function ServiceList() {
+  return (
+    <section className="my-8 text-base leading-relaxed">
+      <strong className="block mb-2 text-xl">Þjónustan okkar:</strong>
+      <ul className="list-disc ml-8 mb-4 space-y-2">
+        <li>
+          <b>Fyrir alla 17 ára og eldri:</b> Þú getur pantað ökumann sem keyrir bílinn þinn á milli staða, hvort sem þú vilt fara aðra leið sjálf/ur eða þarft að sækja bílinn þinn.
+        </li>
+        <li>
+          <b>Ef þú ert of þreytt/ur eða undir áhrifum:</b> Við tryggjum að þú og bíllinn þinn komist heim örugglega, án þess að þú þurfir að keyra sjálf/ur.
+        </li>
+        <li>
+          <b>Auðveld bókun:</b> Settu inn staðsetningu bílsins og áfangastað í appinu og við sendum ökumann til að sækja og keyra bílinn þinn.
+        </li>
+      </ul>
+        <h2 className="text-lg font-semibold mb-1">Öryggi og traust</h2>
+        <p>
+          Öryggi þitt og bílsins þíns er okkar forgangsatriði. Allir okkar ökumenn eru reyndir, ábyrgir og vandlega valdir af okkur. Við mælum einungis með ökumönnum sem hafa sýnt fram á áreiðanleika og góða þjónustu. Þú getur verið viss um að bíllinn þinn er í öruggum höndum frá upphafi til enda.
+        </p>
+      <span>
+        Markmið okkar er að tryggja að þú getir komið bílnum þínum á áfangastað á öruggan hátt, hvort sem þú getur eða vilt ekki keyra sjálf/ur. Þú þarft aldrei að biðja vin um hjálp eða taka áhættu á að keyra þreytt/ur eða undir áhrifum.
+      </span>
+    </section>
+  );
+}
+
+function OrderButton() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { user } = await supabaseClient.getCurrentUser();
+      setIsAuthenticated(!!user);
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, []);
+
+  const handleClick = () => {
+    if (isAuthenticated) {
+      router.push("/stadsetnig");
+    } else {
+      router.push("/sign_up");
+    }
+  };
+
+  return (
+    <>
+      {/* Desktop button */}
+      <div className="hidden md:flex justify-center my-8">
+        <button
+          onClick={handleClick}
+          disabled={isLoading}
+          className="w-100 py-5 text-lg rounded-xl bg-[#E7ECEF] text-gray-900 shadow-lg hover:bg-[#d4e3ed] transition font-semibold border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Panta
+        </button>
+      </div>
+      {/* Mobile button */}
+      <div className="md:hidden">
+        <button
+          onClick={handleClick}
+          disabled={isLoading}
+          className="fixed left-[5vw] right-[5vw] bottom-4 w-[90vw] py-4 text-lg rounded-xl bg-[#E7ECEF] text-gray-900 shadow-lg z-50 hover:bg-[#d4e3ed] transition font-semibold border border-gray-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Panta
+        </button>
+      </div>
+    </>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <main className="max-w-3xl mx-auto p-6 min-h-screen font-sans">
+      <HeroSection />
+      <OrderButton />
+      <ServiceList />
+      <p className="text-lg mt-8">
+        Þægileg og örugg þjónusta fyrir þig og bílinn þinn. Hafðu samband og við sjáum um restina!
+      </p>
+      {/* Custom link color */}
+      <style jsx global>{`
+        a, a:visited {
+          color: #E7ECEF; 
+          text-decoration: none;
+        }
+        a:hover {
+          text-decoration: underline;
+        }
+      `}</style>
+    </main>
   );
 }

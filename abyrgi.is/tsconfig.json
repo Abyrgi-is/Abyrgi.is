@@ -1,14 +1,18 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node", // "bundler" can sometimes cause issues; "node" is safer for Next.js
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -18,10 +22,20 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".", // baseUrl should be set so paths work relative to project root
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "src/*"
+      ] // corrected path; remove the leading "./"
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts"
+  ], // removed .next/types/**/*.ts
+  "exclude": [
+    "node_modules"
+  ]
 }
