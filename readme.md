@@ -124,7 +124,7 @@ við vorum ekki með neina apis keys nemma bara fyrir supabase
 
 ## Userflow
 
-https://github.com/user-attachments/assets/0c60d8dd-4062-45fe-b7a2-b6ecfee3baa5
+https://www.youtube.com/watch?v=27-EQAqfrHc
 
 
 
