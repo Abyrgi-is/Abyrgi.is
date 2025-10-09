@@ -27,6 +27,7 @@ Markmið forritsins er að stuðla að auknu öryggi í umferðinni, draga úr d
 
 **Aldur er alltaf yfir 17 ára**
 
+
 - **Sem notandi sem þarf að koma bílnum mínum frá A til Ö**  
   vill ég geta pantað ökumann í appinu sem keyrir bílinn minn á milli staða  
   svo að ég geti farið aðra leið sjálf/ur en samt fengið bílinn minn á réttan stað.  
