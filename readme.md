@@ -101,4 +101,6 @@ npm start
 ## Database
 
 ![database](./database.png)
+
+
 [View the Database Schema SQL](database/database_schema.sql)
