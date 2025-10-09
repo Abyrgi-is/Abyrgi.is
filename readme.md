@@ -30,8 +30,13 @@
 
 # Almenn lýsing
 
-Vef- og snjallforritið býður notendum, sem eru yfir 17 ára, upp á þjónustu þar sem hægt er að panta ökumann til að keyra bíl notandans frá einum stað til annars.  
-Markmið forritsins er að tryggja að einstaklingar geti komið bílnum sínum á áfangastað á öruggan hátt, jafnvel þó þeir sjálfir geti ekki eða vilji ekki keyra.
+Vef- og snjallforritið er hannað fyrir einstaklinga 17 ára og eldri sem vilja tryggja að bíll þeirra komist örugglega á áfangastað, jafnvel þótt þeir sjálfir geti ekki eða vilji ekki keyra.
+
+Með forritinu geta notendur pantað traustan og skráðan ökumann sem kemur á tiltekinn stað, tekur við bílnum og ekur honum á öruggan hátt á valinn áfangastað. Notandinn getur fylgst með ferðinni í rauntíma í gegnum appið, séð áætlaðan komutíma og fengið staðfestingu þegar bíllinn hefur verið afhentur.
+
+Þjónustan hentar m.a. þegar einstaklingur hefur drukkið áfengi, er þreyttur eftir langan vinnudag, þarf að koma bílnum í viðgerð eða flytja hann milli staða án þess að keyra sjálfur.
+
+Markmið forritsins er að stuðla að auknu öryggi í umferðinni, draga úr drukknarakstri og gera fólki kleift að nýta bílinn sinn á öruggan og ábyrgan hátt. Kerfið notar örugga auðkenningu, staðsetningartækni og gagnavernd til að tryggja bæði öryggi notenda og ökumanna.
 
 ---
 
