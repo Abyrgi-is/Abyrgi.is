@@ -1,3 +1,22 @@
+# Abyrgi.is
+
+** Höfundar eru Ari Frímannsson, Aron Frosti Davíðsson, Pétur Jónsson
+- ** VEFÞ3VÞ05DU-Hát Vefforritun II, Tölvubraut, Tækniskólin 
+
+---
+
+# Almenn lýsing
+
+Vef- og snjallforritið er hannað fyrir einstaklinga 17 ára og eldri sem vilja tryggja að bíll þeirra komist örugglega á áfangastað, jafnvel þótt þeir sjálfir geti ekki eða vilji ekki keyra.
+
+Með forritinu geta notendur pantað traustan og skráðan ökumann sem kemur á tiltekinn stað, tekur við bílnum og ekur honum á öruggan hátt á valinn áfangastað. Notandinn getur fylgst með ferðinni í rauntíma í gegnum appið, séð áætlaðan komutíma og fengið staðfestingu þegar bíllinn hefur verið afhentur.
+
+Þjónustan hentar m.a. þegar einstaklingur hefur drukkið áfengi, er þreyttur eftir langan vinnudag, þarf að koma bílnum í viðgerð eða flytja hann milli staða án þess að keyra sjálfur.
+
+Markmið forritsins er að stuðla að auknu öryggi í umferðinni, draga úr drukknarakstri og gera fólki kleift að nýta bílinn sinn á öruggan og ábyrgan hátt. Kerfið notar örugga auðkenningu, staðsetningartækni og gagnavernd til að tryggja bæði öryggi notenda og ökumanna.
+
+---
+
 # User Stories
 
 **Aldur er alltaf yfir 17 ára**
@@ -26,17 +45,7 @@
   vill ég sjá kort með staðsetningu allra tiltækra ökumanna í rauntíma í gegnum appið  
   svo að ég geti valið þann sem er best staðsettur fyrir nýtt verkefni.  
 
----
 
-# Almenn lýsing
-
-Vef- og snjallforritið er hannað fyrir einstaklinga 17 ára og eldri sem vilja tryggja að bíll þeirra komist örugglega á áfangastað, jafnvel þótt þeir sjálfir geti ekki eða vilji ekki keyra.
-
-Með forritinu geta notendur pantað traustan og skráðan ökumann sem kemur á tiltekinn stað, tekur við bílnum og ekur honum á öruggan hátt á valinn áfangastað. Notandinn getur fylgst með ferðinni í rauntíma í gegnum appið, séð áætlaðan komutíma og fengið staðfestingu þegar bíllinn hefur verið afhentur.
-
-Þjónustan hentar m.a. þegar einstaklingur hefur drukkið áfengi, er þreyttur eftir langan vinnudag, þarf að koma bílnum í viðgerð eða flytja hann milli staða án þess að keyra sjálfur.
-
-Markmið forritsins er að stuðla að auknu öryggi í umferðinni, draga úr drukknarakstri og gera fólki kleift að nýta bílinn sinn á öruggan og ábyrgan hátt. Kerfið notar örugga auðkenningu, staðsetningartækni og gagnavernd til að tryggja bæði öryggi notenda og ökumanna.
 
 ---
 
