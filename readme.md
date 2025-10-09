@@ -4,9 +4,8 @@
 - **VEFÞ3VÞ05DU-Hát Vefforritun II, Tölvubraut, Tækniskólin**
 - **[Skoða Ábyrgð](https://abyrgi.afd.is/)**
 
-<video src="user-flow-myndband.mp4" controls width="600">
-  Your browser does not support the video tag.
-</video>
+[🎥 Watch the user flow video](user-flow-myndband.mp4)
+
 
 
 ---
