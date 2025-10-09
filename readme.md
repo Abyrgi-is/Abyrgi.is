@@ -125,6 +125,9 @@ við vorum ekki með neina apis keys nemma bara fyrir supabase
 
 [🎥 Watch the user flow video](user-flow-myndband.mp4)
 
+
+[📸 Skoða skjámyndir af vefappi](skjamyndir-af-vefappi)
+
 ## Samantekt
 óklárup verkefni voru t.d stilingar page, confurmation text fyrir ride, bettri korta vinsla (ekki nota leaflet nema þið hattið ykkut sjálf) og það að þú getur séð eldri pantanir 
 
