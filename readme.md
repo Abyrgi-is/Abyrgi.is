@@ -123,7 +123,9 @@ við vorum ekki með neina apis keys nemma bara fyrir supabase
 
 ## Userflow
 
-[🎥 Watch the user flow video](user-flow-myndband.mp4)
+https://github.com/user-attachments/assets/0c60d8dd-4062-45fe-b7a2-b6ecfee3baa5
+
+
 
 
 [📸 Skoða skjámyndir af vefappi](skjamyndir-af-vefappi)
