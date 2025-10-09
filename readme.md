@@ -95,3 +95,12 @@ npm run build
 
 # Keyra production build
 npm start
+
+
+---
+
+## Database upsettnig
+
+![database](./database.png)
+
+[Database Schema](./database/Database%20Schema.sql)
