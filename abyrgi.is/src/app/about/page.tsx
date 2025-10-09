@@ -19,9 +19,9 @@ function WorkerCard({ src, name, role }: { src: string; name: string; role: stri
 export function ImagesSection() {
     return (
         <div className="flex justify-center gap-8 my-10">
-            <WorkerCard src="/images/Dominos_Ari.jpg" name="Ari Frímannsson" role="Next Developer - Style Manager" />
-            <WorkerCard src="/images/Dominos_Aron.jpg" name="Aron Frosti Davíðsson" role="Databse Manager" />
-            <WorkerCard src="/images/Dominos_Petur.jpg" name="Pétur Jónsson" role="Next Developer - Backend Manager" />
+            <WorkerCard src="/images/Ari_business.jpg" name="Ari Frímannsson" role="Next Developer - Style Manager" />
+            <WorkerCard src="/images/Aron_business.jpg" name="Aron Frosti Davíðsson" role="Databse Manager" />
+            <WorkerCard src="/images/petur_business.jpg" name="Pétur Jónsson" role="Next Developer - Backend Manager" />
         </div>
     );
 }

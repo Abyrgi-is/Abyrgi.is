@@ -43,8 +43,8 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Þjónustuvér</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="tel:+354-581-2345" className="text-gray-300 hover:text-white transition-colors">
-                  📞 581-2345
+                <a href="tel:+354-123-1234" className="text-gray-300 hover:text-white transition-colors">
+                  📞 123-1234
                 </a>
               </li>
               <li>
