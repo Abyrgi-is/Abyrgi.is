@@ -57,8 +57,8 @@ Markmið forritsins er að stuðla að auknu öryggi í umferðinni, draga úr d
 
 # Wireframe:
 
-![wireframe](./wireframe_user.jpg)
-![wireframe](./IMG_0284_(1).jpg)
+![wireframe](./myndir/wireframe_user.jpg)
+![wireframe](./myndir/IMG_0284_(1).jpg)
 ---
 
 ## 🧱 Tæknistafli
@@ -105,7 +105,7 @@ npm start
 ---
 ## Database
 
-![database](./database.png)
+![database](./database/database.png)
 
 
 [View the Database Schema SQL](database/database_schema.sql)
