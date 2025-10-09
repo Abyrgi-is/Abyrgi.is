@@ -1,7 +1,7 @@
 # Abyrgi.is
 
-** Höfundar eru Ari Frímannsson, Aron Frosti Davíðsson, Pétur Jónsson
-- ** VEFÞ3VÞ05DU-Hát Vefforritun II, Tölvubraut, Tækniskólin 
+**Höfundar eru Ari Frímannsson, Aron Frosti Davíðsson, Pétur Jónsson
+- **VEFÞ3VÞ05DU-Hát Vefforritun II, Tölvubraut, Tækniskólin 
 
 ---
 
