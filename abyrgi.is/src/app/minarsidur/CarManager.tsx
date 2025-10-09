@@ -22,10 +22,10 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
             const { user, error } = await supabaseClient.getCurrentUser();
             if (!error && user) {
                 setUserId(user.id);
-                console.log("CarManager: User authenticated:", user.id);
+                //console.log("CarManager: User authenticated:", user.id);
             } else {
                 setUserId(null);
-                console.log("CarManager: No user authenticated", error);
+                //console.log("CarManager: No user authenticated", error);
             }
         };
 
@@ -45,7 +45,7 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
         }
 
         setMessage("Adding...");
-        console.log("Authenticated Supabase UID:", userIdState);
+        //console.log("Authenticated Supabase UID:", userIdState);
         
         const { data, error } = await supabaseClient.insertRow(
             "cars", 
@@ -53,7 +53,7 @@ export default function CarManager({ onCarChange }: { onCarChange: () => void })
             "abyrgi"
         );
         
-        console.log("user_id in insert payload:", userIdState);
+        //console.log("user_id in insert payload:", userIdState);
         if (error) setMessage("Error: " + error.message);
         else {
             setMessage("Car added!");

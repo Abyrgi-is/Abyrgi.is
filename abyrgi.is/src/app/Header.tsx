@@ -56,7 +56,7 @@ export function Header() {
           setIsDriver(false);
         }
       } catch (error) {
-        console.error("Auth check error:", error);
+        // console.error("Auth check error:", error);
         setUserAuthenticated(false);
       }
     };
@@ -72,7 +72,7 @@ export function Header() {
     try {
       const { error } = await supabaseClient.signOut();
       if (error) {
-        console.error("Sign out error:", error);
+        // console.error("Sign out error:", error);
         alert("Error signing out: " + error.message);
       } else {
         // Redirect to home page after successful sign out
@@ -81,7 +81,7 @@ export function Header() {
         window.location.reload();
       }
     } catch (err) {
-      console.error("Unexpected sign out error:", err);
+      // console.error("Unexpected sign out error:", err);
       alert("Unexpected error signing out");
     }
   };

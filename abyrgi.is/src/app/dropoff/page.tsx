@@ -67,7 +67,7 @@ function DropoffPageContent() {
                         2: 'Location unavailable',
                         3: 'Location request timeout'
                     };
-                    console.warn(`Geolocation error (${err.code}): ${errorMessages[err.code] || 'Unknown error'}. Using default location (Reykjavik).`);
+                    // console.warn(`Geolocation error (${err.code}): ${errorMessages[err.code] || 'Unknown error'}. Using default location (Reykjavik).`);
                     // Default to Reykjavik if location is denied
                     setStaffLocation([64.1466, -21.9426]);
                 },
@@ -78,7 +78,7 @@ function DropoffPageContent() {
                 }
             );
         } else {
-            console.warn('Geolocation not available. Using default location (Reykjavik).');
+            // console.warn('Geolocation not available. Using default location (Reykjavik).');
             // Default location (Reykjavik)
             setStaffLocation([64.1466, -21.9426]);
         }
@@ -93,15 +93,15 @@ function DropoffPageContent() {
                 const { data, error } = await supabaseClient.getAllOrdersWithLocations('abyrgi');
                 
                 if (error) {
-                    console.error('Error fetching orders:', error);
+                    // console.error('Error fetching orders:', error);
                     setError(error.message);
                 } else {
-                    console.log('All orders fetched from database:', data);
-                    console.log('Number of orders:', (data || []).length);
+                    //console.log('All orders fetched from database:', data);
+                    //console.log('Number of orders:', (data || []).length);
                     
                     // Log each order's status
                     (data || []).forEach(order => {
-                        console.log(`Order ${order.order_id}: status = ${order.status}`);
+                        //console.log(`Order ${order.order_id}: status = ${order.status}`);
                     });
                     
                     // Filter out completed orders on the client side if needed
@@ -109,13 +109,13 @@ function DropoffPageContent() {
                         order.status !== 'completed' && order.status !== 'cancelled'
                     );
                     
-                    console.log('Active orders after filtering:', activeOrders);
-                    console.log('Number of active orders:', activeOrders.length);
+                    //console.log('Active orders after filtering:', activeOrders);
+                    //console.log('Number of active orders:', activeOrders.length);
                     
                     setOrders(activeOrders);
                 }
             } catch (err) {
-                console.error('Error fetching orders:', err);
+                // console.error('Error fetching orders:', err);
                 setError('Failed to load orders');
             } finally {
                 setLoading(false);

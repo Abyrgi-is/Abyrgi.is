@@ -55,7 +55,7 @@ const SignupForm: React.FC = () => {
       );
 
       if (createError) {
-        console.error(`Error during ${step}:`, createError);
+        // console.error(`Error during ${step}:`, createError);
 
         if (step === 'auth') {
           setError(createError.message || "Failed to create account. Please try again.");
@@ -68,12 +68,12 @@ const SignupForm: React.FC = () => {
         return;
       }
 
-      console.log("User created successfully:", data);
+      // console.log("User created successfully:", data);
       
       // Redirect to sign in page with a parameter indicating they should check email
       router.push('/sign_in?message=confirm_email');
     } catch (err) {
-      console.error("Unexpected Error:", err);
+      // console.error("Unexpected Error:", err);
       setError("An unexpected error occurred. Please try again.");
       setLoading(false);
     }

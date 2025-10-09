@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       // Redirect to the intended page or home
       return NextResponse.redirect(`${origin}${next}`)
     } else {
-      console.error('Auth callback error:', error)
+      // console.error('Auth callback error:', error)
       return NextResponse.redirect(`${origin}/auth/auth-code-error`)
     }
   }

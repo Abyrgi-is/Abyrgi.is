@@ -74,7 +74,7 @@ function PickupPageContent() {
           setIsLoading(false);
         },
         (error) => {
-          console.error('Villa við að fá staðsetningu:', error);
+          // console.error('Villa við að fá staðsetningu:', error);
           // Fallback to Reykjavik center
           setUserLocation([64.1466, -21.9426]);
           setError('Gat ekki fundið þína staðsetningu, notum miðbæ Reykjavíkur');

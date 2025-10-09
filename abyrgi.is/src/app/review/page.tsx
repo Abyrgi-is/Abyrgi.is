@@ -226,7 +226,7 @@ function ReviewPageContent() {
         try {
             const { user, error: userError } = await supabaseClient.getCurrentUser();
             if (userError || !user) {
-                console.log('No user found:', userError);
+                //console.log('No user found:', userError);
                 return;
             }
 
@@ -419,7 +419,7 @@ function ReviewPageContent() {
                 const { error: archiveError } = await supabaseClient.updateRows('orders', { status: 'archived' }, { column: 'order_id', value: selectedTrip.order_id }, 'abyrgi');
 
                 } catch (archiveError) {
-                    console.warn('Failed to archive order after review:', archiveError);
+                    // console.warn('Failed to archive order after review:', archiveError);
                     // Don't fail the review process if archiving fails
                 }
 

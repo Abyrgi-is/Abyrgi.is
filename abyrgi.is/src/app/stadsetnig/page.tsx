@@ -69,7 +69,7 @@ function StadsetnigPageContent() {
       try {
         localStorage.setItem('bookingData', JSON.stringify(bookingData));
       } catch (error) {
-        console.error('Failed to save booking data to localStorage:', error);
+        // console.error('Failed to save booking data to localStorage:', error);
       }
     }
   };

@@ -3,7 +3,7 @@ import { createClient } from '../../utils/supabase/server'
 export default async function Page() {
   const supabase = await createClient()
 
-  console.log('Logging in as test user...')
+  // console.log('Logging in as test user...')
   
   // Attempt to log in with predefined credentials
   const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
@@ -12,7 +12,7 @@ export default async function Page() {
   })
 
   if (loginError) {
-    console.error('Login error:', loginError)
+    // console.error('Login error:', loginError)
     return (
       <div>
         <h1>Database Connection Test</h1>
@@ -21,7 +21,7 @@ export default async function Page() {
     )
   }
 
-  console.log('Login successful:', loginData)
+  // console.log('Login successful:', loginData)
 
   // Test without schema first
   const { data: carsNoSchema, error: errorNoSchema } = await supabase
