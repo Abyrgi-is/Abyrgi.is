@@ -124,9 +124,9 @@ við vorum ekki með neina apis keys nemma bara fyrir supabase
 
 ## Userflow
 
-https://www.youtube.com/watch?v=27-EQAqfrHc
+## 🎥 Myndband – Userflow
 
-
+[![Userflow video](https://img.youtube.com/vi/27-EQAqfrHc/0.jpg)](https://www.youtube.com/watch?v=27-EQAqfrHc)
 
 
 [📸 Skoða skjámyndir af vefappi](skjamyndir-af-vefappi)
